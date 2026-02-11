@@ -1,0 +1,40 @@
+<%- include('partials/header') %>
+
+<main>
+    <section class="section">
+        <div class="container">
+            <h1 class="section-title">My Wishlist</h1>
+            
+            <% if (wishlist && wishlist.products && wishlist.products.length > 0) { %>
+            <div class="product-grid">
+                <% wishlist.products.forEach(product => { %>
+                <div class="product-card" onclick="window.location.href='/products/<%= product._id %>'">
+                    <img src="<%= product.images && product.images[0] ? product.images[0] : '/images/p1.jpeg' %>" alt="<%= product.name %>" class="product-image">
+                    <div class="product-info">
+                        <h3 class="product-name"><%= product.name %></h3>
+                        <div class="product-price">
+                            $<%= product.price.toFixed(2) %>
+                            <% if (product.originalPrice && product.originalPrice > product.price) { %>
+                            <span class="original">$<%= product.originalPrice.toFixed(2) %></span>
+                            <% } %>
+                        </div>
+                        <div class="product-actions">
+                            <button class="btn btn-add-cart" onclick="event.stopPropagation(); addToCart('<%= product._id %>')">Add to Cart</button>
+                            <button class="btn btn-wishlist" style="background: var(--primary-color); color: white;" onclick="event.stopPropagation(); removeFromWishlist('<%= product._id %>')">Remove</button>
+                        </div>
+                    </div>
+                </div>
+                <% }); %>
+            </div>
+            <% } else { %>
+            <div style="text-align: center; padding: 5rem;">
+                <h2 style="margin-bottom: 1rem; color: var(--text-light);">Your wishlist is empty</h2>
+                <a href="/products" class="btn btn-add-cart">Browse Products</a>
+            </div>
+            <% } %>
+        </div>
+    </section>
+</main>
+
+<%- include('partials/footer') %>
+

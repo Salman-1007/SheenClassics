@@ -1,0 +1,77 @@
+<%- include('../partials/header') %>
+
+<main>
+    <section class="section">
+        <div class="container admin-container">
+            <h1 class="section-title">Manage Orders</h1>
+            
+            <div style="background: var(--white); padding: 2rem; border-radius: 10px; box-shadow: var(--shadow);">
+                <% if (orders && orders.length > 0) { %>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Customer</th>
+                            <th>Items</th>
+                            <th>Total</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% orders.forEach(order => { %>
+                        <tr>
+                            <td><%= order._id.toString().substring(0, 8) %></td>
+                            <td><%= order.user.name %><br><small style="color: var(--text-light);"><%= order.user.email %></small></td>
+                            <td><%= order.items.length %> item(s)</td>
+                            <td>$<%= order.total.toFixed(2) %></td>
+                            <td>
+                                <select onchange="updateOrderStatus('<%= order._id %>', this.value)" style="padding: 0.5rem; border-radius: 5px; border: 2px solid var(--border-color);">
+                                    <option value="pending" <%= order.status === 'pending' ? 'selected' : '' %>>Pending</option>
+                                    <option value="processing" <%= order.status === 'processing' ? 'selected' : '' %>>Processing</option>
+                                    <option value="shipped" <%= order.status === 'shipped' ? 'selected' : '' %>>Shipped</option>
+                                    <option value="delivered" <%= order.status === 'delivered' ? 'selected' : '' %>>Delivered</option>
+                                    <option value="cancelled" <%= order.status === 'cancelled' ? 'selected' : '' %>>Cancelled</option>
+                                </select>
+                            </td>
+                            <td><%= new Date(order.createdAt).toLocaleDateString() %></td>
+                            <td><a href="/orders/<%= order._id %>" class="btn" style="background: var(--secondary-color); color: white; padding: 0.5rem 1rem;">View</a></td>
+                        </tr>
+                        <% }); %>
+                    </tbody>
+                </table>
+                <% } else { %>
+                <p style="text-align: center; padding: 2rem; color: var(--text-light);">No orders found.</p>
+                <% } %>
+            </div>
+        </div>
+    </section>
+</main>
+
+<script>
+async function updateOrderStatus(orderId, status) {
+    try {
+        const response = await fetch(`/admin/orders/${orderId}/status`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ status })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            showNotification('Order status updated', 'success');
+        } else {
+            showNotification(data.message, 'error');
+        }
+    } catch (error) {
+        showNotification('Failed to update order status', 'error');
+    }
+}
+</script>
+
+<%- include('../partials/footer') %>
+

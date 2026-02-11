@@ -1,0 +1,110 @@
+<%- include('partials/header') %>
+
+<main>
+    <section class="section">
+        <div class="container">
+            <h1 class="section-title">Order Details</h1>
+
+            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 3rem;">
+                <div>
+                    <div style="background: var(--white); padding: 2rem; border-radius: 10px; box-shadow: var(--shadow); margin-bottom: 2rem;">
+                        <h2 style="font-family: 'Playfair Display', serif; margin-bottom: 1.5rem;">Order Items</h2>
+                        <% order.items.forEach(item => { %>
+                        <div style="display: flex; gap: 1.5rem; margin-bottom: 1.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--border-color);">
+                            <img src="<%= item.product.images && item.product.images[0] ? item.product.images[0] : '/images/p1.jpeg' %>" alt="<%= item.product.name %>" style="width: 120px; height: 120px; object-fit: cover; border-radius: 5px;">
+                            <div style="flex: 1;">
+                                <h3 style="margin-bottom: 0.5rem;"><%= item.product.name %></h3>
+                                <p style="color: var(--text-light); margin-bottom: 0.5rem;">Quantity: <%= item.quantity %></p>
+                                <% if (item.size) { %>
+                                <p style="color: var(--text-light); margin-bottom: 0.5rem;">Size: <%= item.size %></p>
+                                <% } %>
+                                <% if (item.color) { %>
+                                <p style="color: var(--text-light); margin-bottom: 0.5rem;">Color: <%= item.color %></p>
+                                <% } %>
+                                <p style="color: var(--secondary-color); font-weight: 600; font-size: 1.2rem;">Rs.<%= (item.price * item.quantity).toFixed(2) %></p>
+                            </div>
+                        </div>
+                        <% }); %>
+                    </div>
+
+                    <div style="background: var(--white); padding: 2rem; border-radius: 10px; box-shadow: var(--shadow);">
+                        <h2 style="font-family: 'Playfair Display', serif; margin-bottom: 1.5rem;">Shipping Address</h2>
+                        <p><%= order.shippingAddress.street %></p>
+                        <p><%= order.shippingAddress.city %>, <%= order.shippingAddress.state %> <%= order.shippingAddress.zipCode %></p>
+                        <p><%= order.shippingAddress.country %></p>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="cart-summary">
+                        <h2 style="margin-bottom: 1.5rem; font-family: 'Playfair Display', serif;">Order Summary</h2>
+                        <div class="summary-row">
+                            <span>Subtotal:</span>
+                            <span>Rs.<%= order.subtotal.toFixed(2) %></span>
+                        </div>
+                        <% if (order.discount > 0) { %>
+                        <div class="summary-row">
+                            <span>Discount<% if (order.couponCode) { %> (<%= order.couponCode %>)<% } %>:</span>
+                            <span>Rs.<%= order.discount.toFixed(2) %></span>
+                        </div>
+                        <% } %>
+                        <div class="summary-row">
+                            <span>Shipping:</span>
+                            <span>Free</span>
+                        </div>
+                        <div class="summary-total">
+                            <div class="summary-row">
+                                <span>Total:</span>
+                                <span>Rs.<%= order.total.toFixed(2) %></span>
+                            </div>
+                        </div>
+                        <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 2px solid var(--border-color);">
+                            <p><strong>Status:</strong> <span style="text-transform: capitalize; color: var(--secondary-color);"><%= order.status %></span></p>
+                            <p style="margin-top: 0.5rem;"><strong>Payment Method:</strong> <span style="text-transform: capitalize;"><%= order.paymentMethod %></span></p>
+                            <% if (order.paymentMethod === 'jazzcash' && order.paymentDetails && order.paymentDetails.jazzcashNumber) { %>
+                            <p style="margin-top: 0.5rem; color: var(--text-light);">JazzCash Number: <%= order.paymentDetails.jazzcashNumber %></p>
+                            <% } %>
+                            <% if (order.paymentMethod === 'whatsapp' && order.paymentDetails && order.paymentDetails.whatsappNumber) { %>
+                            <p style="margin-top: 0.5rem; color: var(--text-light);">WhatsApp Number: <%= order.paymentDetails.whatsappNumber %></p>
+                            <% } %>
+                            <p style="margin-top: 0.5rem; color: var(--text-light);">Order Date: <%= new Date(order.createdAt).toLocaleDateString() %></p>
+                            <% if (order.status === 'pending' || order.status === 'processing') { %>
+                            <button onclick="cancelOrder('<%= order._id %>')" class="btn" style="background: #f44336; color: white; width: 100%; margin-top: 1rem;">Cancel Order</button>
+                            <% } %>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<script>
+    async function cancelOrder(orderId) {
+        if (!confirm('Are you sure you want to cancel this order?')) {
+            return;
+        }
+
+        try {
+            const response = await fetch(`/orders/${orderId}/cancel`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                alert(data.message);
+                location.reload();
+            } else {
+                alert(data.message);
+            }
+        } catch (error) {
+            alert('Failed to cancel order');
+        }
+    }
+</script>
+
+<%- include('partials/footer') %>

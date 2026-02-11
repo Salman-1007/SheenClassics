@@ -1,0 +1,50 @@
+<%- include('partials/header') %>
+
+<main>
+    <section class="section">
+        <div class="container">
+            <h1 class="section-title">My Orders</h1>
+
+            <% if (orders && orders.length > 0) { %>
+            <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                <% orders.forEach(order => { %>
+                <div style="background: var(--white); padding: 2rem; border-radius: 10px; box-shadow: var(--shadow);">
+                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1.5rem;">
+                        <div>
+                            <h3 style="font-family: 'Playfair Display', serif; margin-bottom: 0.5rem;">Order #<%= order._id.toString().substring(0, 8) %></h3>
+                            <p style="color: var(--text-light);">Placed on <%= new Date(order.createdAt).toLocaleDateString() %></p>
+                        </div>
+                        <div style="text-align: right;">
+                            <p style="font-size: 1.5rem; font-weight: 700; color: var(--secondary-color);">$<%= order.total.toFixed(2) %></p>
+                            <p style="text-transform: capitalize; color: var(--text-light);"><%= order.status %></p>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 1.5rem;">
+                        <% order.items.forEach(item => { %>
+                        <div style="display: flex; gap: 1rem; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border-color);">
+                            <img src="<%= item.product.images && item.product.images[0] ? item.product.images[0] : '/images/p1.jpeg' %>" alt="<%= item.product.name %>" style="width: 100px; height: 100px; object-fit: cover; border-radius: 5px;">
+                            <div style="flex: 1;">
+                                <h4><%= item.product.name %></h4>
+                                <p style="color: var(--text-light);">Quantity: <%= item.quantity %></p>
+                                <p style="color: var(--secondary-color); font-weight: 600;">Rs.<%= (item.price * item.quantity).toFixed(2) %></p>
+                            </div>
+                        </div>
+                        <% }); %>
+                    </div>
+
+                    <a href="/orders/<%= order._id %>" class="btn" style="background: var(--primary-color); color: white;">View Details</a>
+                </div>
+                <% }); %>
+            </div>
+            <% } else { %>
+            <div style="text-align: center; padding: 5rem;">
+                <h2 style="margin-bottom: 1rem; color: var(--text-light);">No orders found</h2>
+                <a href="/products" class="btn btn-add-cart">Start Shopping</a>
+            </div>
+            <% } %>
+        </div>
+    </section>
+</main>
+
+<%- include('partials/footer') %>

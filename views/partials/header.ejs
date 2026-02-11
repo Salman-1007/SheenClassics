@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        <%= typeof title !== 'undefined' ? title : 'SheenClassics - Premium Clothing' %>
+    </title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-wrapper">
+                <a href="/" class="logo" aria-label="SheenClassics home">
+                    <img src="/images/logoc.jpg" alt="SheenClassics Logo">
+                </a>
+                <ul class="nav-menu">
+                    <li><a href="/" class="nav-link">Home</a></li>
+                    <li><a href="/products" class="nav-link">Products</a></li>
+                    <% if (typeof session !== 'undefined' && session.userId) { %>
+                        <li><a href="/account" class="nav-link">Account</a></li>
+                        <% if (session.isAdmin) { %>
+                            <li><a href="/admin/dashboard" class="nav-link admin-link">Admin Panel</a></li>
+                            <% } %>
+                                <li><a href="/auth/logout" class="nav-link" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">Logout</a></li>
+                                <form id="logout-form" action="/auth/logout" method="POST" style="display: none;"></form>
+                                <% } else { %>
+                                    <li><a href="/auth/login" class="nav-link">Login</a></li>
+                                    <li><a href="/auth/signup" class="nav-link btn-primary">Sign Up</a></li>
+                                    <% } %>
+                </ul>
+                <button class="mobile-menu-toggle" aria-label="Toggle menu">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+            </div>
+        </div>
+    </nav>

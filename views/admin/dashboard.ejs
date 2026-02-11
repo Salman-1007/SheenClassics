@@ -1,0 +1,87 @@
+<%- include('../partials/header') %>
+
+    <main>
+        <section class="section">
+            <div class="container admin-container">
+                <div class="admin-header">
+                    <h1 class="section-title" style="margin: 0;">Admin Dashboard</h1>
+                    <a href="/" class="btn btn-add-cart">Back to Site</a>
+                </div>
+
+                <div class="admin-stats">
+                    <div class="stat-card">
+                        <div class="stat-value">
+                            <%= totalProducts %>
+                        </div>
+                        <div class="stat-label">Total Products</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">
+                            <%= totalOrders %>
+                        </div>
+                        <div class="stat-label">Total Orders</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">
+                            <%= totalUsers %>
+                        </div>
+                        <div class="stat-label">Total Users</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">Rs
+                            <%= totalRevenue.toFixed(2) %>
+                        </div>
+                        <div class="stat-label">Total Revenue</div>
+                    </div>
+                </div>
+
+                <div style="background: var(--white); padding: 2rem; border-radius: 10px; box-shadow: var(--shadow);">
+                    <h2 style="font-family: 'Playfair Display', serif; margin-bottom: 1.5rem;">Recent Orders</h2>
+                    <% if (recentOrders && recentOrders.length > 0) { %>
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Order ID</th>
+                                    <th>Customer</th>
+                                    <th>Total</th>
+                                    <th>Status</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% recentOrders.forEach(order => { %>
+                                    <tr>
+                                        <td>
+                                            <%= order._id.toString().substring(0, 8) %>
+                                        </td>
+                                        <td>
+                                            <%= order.user.name %>
+                                        </td>
+                                        <td>Rs
+                                            <%= order.total.toFixed(2) %>
+                                        </td>
+                                        <td style="text-transform: capitalize;">
+                                            <%= order.status %>
+                                        </td>
+                                        <td>
+                                            <%= new Date(order.createdAt).toLocaleDateString() %>
+                                        </td>
+                                    </tr>
+                                    <% }); %>
+                            </tbody>
+                        </table>
+                        <% } else { %>
+                            <p style="text-align: center; padding: 2rem; color: var(--text-light);">No orders yet.</p>
+                            <% } %>
+                </div>
+
+                <div style="margin-top: 2rem; display: flex; gap: 1rem; justify-content: center;">
+                    <a href="/admin/products" class="btn btn-add-cart">Manage Products</a>
+                    <a href="/admin/orders" class="btn btn-add-cart">Manage Orders</a>
+                    <a href="/admin/coupons" class="btn btn-add-cart">Manage Coupons</a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <%- include('../partials/footer') %>

@@ -1,0 +1,82 @@
+<%- include('../partials/header') %>
+
+<main>
+    <section class="section">
+        <div class="container admin-container">
+            <div class="admin-header">
+                <h1 class="section-title" style="margin: 0;">Manage Products</h1>
+                <a href="/admin/products/add" class="btn btn-add-cart">Add New Product</a>
+            </div>
+            
+            <% if (typeof query !== 'undefined' && query.success) { %>
+            <div class="success-message"><%= query.success %></div>
+            <% } %>
+            <% if (typeof query !== 'undefined' && query.error) { %>
+            <div class="error-message"><%= query.error %></div>
+            <% } %>
+            
+            <div style="background: var(--white); padding: 2rem; border-radius: 10px; box-shadow: var(--shadow);">
+                <% if (products && products.length > 0) { %>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Image</th>
+                            <th>Name</th>
+                            <th>Category</th>
+                            <th>Price</th>
+                            <th>Stock</th>
+                            <th>Featured</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% products.forEach(product => { %>
+                        <tr>
+                            <td><img src="<%= product.images && product.images[0] ? product.images[0] : '/images/p1.jpeg' %>" alt="<%= product.name %>" style="width: 60px; height: 60px; object-fit: cover; border-radius: 5px;"></td>
+                            <td><%= product.name %></td>
+                            <td><%= product.category %></td>
+                            <td>$<%= product.price.toFixed(2) %></td>
+                            <td><%= product.stock %></td>
+                            <td><%= product.featured ? 'Yes' : 'No' %></td>
+                            <td>
+                                <a href="/admin/products/<%= product._id %>/edit" class="btn" style="background: var(--secondary-color); color: white; padding: 0.5rem 1rem; margin-right: 0.5rem;">Edit</a>
+                                <button onclick="deleteProduct('<%= product._id %>')" class="btn" style="background: #f44336; color: white; padding: 0.5rem 1rem;">Delete</button>
+                            </td>
+                        </tr>
+                        <% }); %>
+                    </tbody>
+                </table>
+                <% } else { %>
+                <p style="text-align: center; padding: 2rem; color: var(--text-light);">No products found. <a href="/admin/products/add">Add your first product</a></p>
+                <% } %>
+            </div>
+        </div>
+    </section>
+</main>
+
+<script>
+async function deleteProduct(productId) {
+    if (!confirm('Are you sure you want to delete this product?')) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/admin/products/${productId}`, {
+            method: 'DELETE'
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            location.reload();
+        } else {
+            alert(data.message);
+        }
+    } catch (error) {
+        alert('Failed to delete product');
+    }
+}
+</script>
+
+<%- include('../partials/footer') %>
+
