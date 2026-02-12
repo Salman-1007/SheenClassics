@@ -25,7 +25,7 @@ exports.getDashboard = async(req, res) => {
             totalProducts,
             totalOrders,
             totalUsers,
-            totalRevenue: totalRevenue[0] ? .total || 0,
+            totalRevenue: totalRevenue[0] ?.total || 0,
             recentOrders
         });
     } catch (error) {

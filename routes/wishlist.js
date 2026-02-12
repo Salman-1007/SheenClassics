@@ -3,13 +3,20 @@ const router = express.Router();
 const wishlistController = require('../controllers/wishlistController');
 const { isAuthenticated } = require('../middleware/auth');
 
-// Wishlist page redirects to account with wishlist tab
-router.get('/', isAuthenticated, (req, res) => {
+// Middleware to check if user is logged in, redirect to login with redirect URL if not
+const checkWishlistAccess = (req, res) => {
+  if (!req.session.userId) {
+    return res.redirect('/auth/login?redirect=/account?tab=wishlist');
+  }
   res.redirect('/account?tab=wishlist');
-});
+};
 
-router.post('/add', isAuthenticated, wishlistController.addToWishlist);
-router.delete('/remove', isAuthenticated, wishlistController.removeFromWishlist);
+// Wishlist page - check if logged in
+router.get('/', checkWishlistAccess);
+
+// Add to wishlist - ALLOW unauthenticated users (store in session)
+router.post('/add', wishlistController.addToWishlist);
+router.delete('/remove', wishlistController.removeFromWishlist);
 
 module.exports = router;
 
