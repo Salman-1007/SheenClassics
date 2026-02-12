@@ -3,21 +3,16 @@ const router = express.Router();
 const adminController = require('../controllers/adminController');
 const { isAdmin } = require('../middleware/auth');
 const multer = require('multer');
-const path = require('path');
 
-const storage = multer.diskStorage({
-    destination: function(req, file, cb) {
-        cb(null, path.join(__dirname, '../public/uploads'));
-    },
-    filename: function(req, file, cb) {
-        const ext = path.extname(file.originalname);
-        cb(null, Date.now() + ext);
-    }
-});
+require('../config/cloudinary');
 
+// Use memory storage - files will be uploaded to Cloudinary in controller
+const storage = multer.memoryStorage();
+
+// File filter for image types
 function fileFilter(req, file, cb) {
     const allowedTypes = /jpeg|jpg|png/;
-    const ext = path.extname(file.originalname).toLowerCase();
+    const ext = require('path').extname(file.originalname).toLowerCase();
     if (allowedTypes.test(ext)) {
         cb(null, true);
     } else {
@@ -25,10 +20,11 @@ function fileFilter(req, file, cb) {
     }
 }
 
+// Multer configuration with memory storage
 const upload = multer({
-    storage,
-    fileFilter,
-    limits: { fileSize: 5 * 1024 * 1024 }
+    storage: storage,
+    fileFilter: fileFilter,
+    limits: { fileSize: 5 * 1024 * 1024 } // 5MB limit
 });
 
 router.get('/dashboard', isAdmin, adminController.getDashboard);

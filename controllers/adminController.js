@@ -1,7 +1,9 @@
-const Product = require('../models/Product');
+﻿const Product = require('../models/Product');
 const Order = require('../models/Order');
 const Coupon = require('../models/Coupon');
 const User = require('../models/User');
+const cloudinary = require('cloudinary').v2;
+const streamifier = require('streamifier');
 
 exports.getDashboard = async(req, res) => {
     try {
@@ -23,7 +25,7 @@ exports.getDashboard = async(req, res) => {
             totalProducts,
             totalOrders,
             totalUsers,
-            totalRevenue: totalRevenue[0]?.total || 0,
+            totalRevenue: totalRevenue[0] ? .total || 0,
             recentOrders
         });
     } catch (error) {
@@ -62,27 +64,75 @@ exports.getAddProduct = (req, res) => {
 exports.postAddProduct = async(req, res) => {
     try {
         const { name, description, price, originalPrice, category, sizes, colors, stock, featured } = req.body;
-        let images = [];
-        if (req.file) {
-            images.push('/uploads/' + req.file.filename);
+
+        // Validate required fields
+        if (!name || !description || !price || !category || !stock) {
+            return res.status(400).render('admin/add-product', {
+                title: 'Add Product - SheenClassics',
+                error: 'All required fields must be filled: name, description, price, category, and stock'
+            });
         }
-        const product = new Product({
-            name,
-            description,
-            price: parseFloat(price),
-            originalPrice: originalPrice ? parseFloat(originalPrice) : undefined,
-            category,
-            sizes: sizes ? (Array.isArray(sizes) ? sizes : [sizes]) : [],
-            colors: colors ? (Array.isArray(colors) ? colors : [colors]) : [],
-            stock: parseInt(stock),
-            featured: featured === 'on',
-            images
-        });
-        await product.save();
-        res.redirect('/admin/products?success=Product added successfully');
+
+        // Check if image was uploaded
+        if (!req.file) {
+            return res.status(400).render('admin/add-product', {
+                title: 'Add Product - SheenClassics',
+                error: 'Product image is required'
+            });
+        }
+
+        // Upload to Cloudinary using signed upload with SDK
+        try {
+            const uploadStream = cloudinary.uploader.upload_stream({
+                    folder: 'sheenclassics/products',
+                    resource_type: 'auto',
+                    quality: 'auto'
+                },
+                async(error, result) => {
+                    if (error) {
+                        throw error;
+                    }
+
+                    const imageUrl = result.secure_url;
+
+                    // Create product with Cloudinary image URL
+                    const product = new Product({
+                        name: name.trim(),
+                        description: description.trim(),
+                        price: parseFloat(price),
+                        originalPrice: originalPrice ? parseFloat(originalPrice) : undefined,
+                        category,
+                        sizes: sizes ? (Array.isArray(sizes) ? sizes : [sizes]) : [],
+                        colors: colors ? colors.split(',').map(c => c.trim()).filter(c => c) : [],
+                        stock: parseInt(stock),
+                        featured: featured === 'on',
+                        images: [imageUrl]
+                    });
+
+                    await product.save();
+                    res.redirect('/admin/products?success=Product added successfully');
+                }
+            );
+
+            // Pipe the file buffer to Cloudinary
+            streamifier.createReadStream(req.file.buffer).pipe(uploadStream);
+        } catch (uploadError) {
+            console.error('Cloudinary upload error:', uploadError.message);
+            let errorMsg = uploadError.message || 'Failed to upload image to Cloudinary';
+
+            res.status(500).render('admin/add-product', {
+                title: 'Add Product - SheenClassics',
+                error: errorMsg
+            });
+        }
     } catch (error) {
-        console.error('Error adding product:', error);
-        res.redirect('/admin/products/add?error=Failed to add product');
+        console.error('Error adding product:', error.message);
+        let errorMsg = error.message || 'Failed to add product';
+
+        res.status(500).render('admin/add-product', {
+            title: 'Add Product - SheenClassics',
+            error: errorMsg
+        });
     }
 };
 
