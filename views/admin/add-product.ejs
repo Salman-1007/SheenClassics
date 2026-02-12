@@ -12,7 +12,7 @@
                         </div>
                         <% } %>
 
-                            <form action="/admin/products/add" method="POST">
+                            <form action="/admin/products/add" method="POST" enctype="multipart/form-data">
                                 <div class="form-group">
                                     <label>Product Name</label>
                                     <input type="text" name="name" required>
@@ -69,8 +69,8 @@
                                     </div>
                                 </div>
                                 <div class="form-group">
-                                    <label>Image URL (optional - can add multiple URLs separated by commas)</label>
-                                    <input type="text" name="images" placeholder="https://example.com/image.jpg">
+                                    <label>Product Image (jpg, jpeg, png, max 5MB)</label>
+                                    <input type="file" name="image" accept=".jpg,.jpeg,.png" required>
                                 </div>
                                 <div style="display: flex; gap: 1rem;">
                                     <button type="submit" class="btn btn-add-cart" style="flex: 1;">Add Product</button>
