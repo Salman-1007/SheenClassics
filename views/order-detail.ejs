@@ -5,7 +5,7 @@
             <div class="container">
                 <h1 class="section-title">Order Details</h1>
 
-                <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 3rem;">
+                <div class="order-detail-grid" style="display: grid; grid-template-columns: 2fr 1fr; gap: 3rem;">
                     <div>
                         <div style="background: var(--white); padding: 2rem; border-radius: 10px; box-shadow: var(--shadow); margin-bottom: 2rem;">
                             <h2 style="font-family: 'Playfair Display', serif; margin-bottom: 1.5rem;">Order Items</h2>
@@ -92,9 +92,29 @@
                                                         <p style="margin-top: 0.5rem; color: var(--text-light);">Order Date:
                                                             <%= new Date(order.createdAt).toLocaleDateString() %>
                                                         </p>
-                                                        <% if (order.status === 'pending' || order.status === 'processing') { %>
-                                                            <button onclick="cancelOrder('<%= order._id %>')" class="btn" style="background: #f44336; color: white; width: 100%; margin-top: 1rem;">Cancel Order</button>
+
+                                                        <% if (order.statusHistory && order.statusHistory.length > 0) { %>
+                                                            <div style="margin-top: 1.5rem;">
+                                                                <h4 style="margin-bottom: 0.5rem; font-size: 1rem;">Status History:</h4>
+                                                                <div class="status-history" style="background: #f9f9f9; padding: 1rem; border-radius: 5px;">
+                                                                    <% order.statusHistory.forEach(history => { %>
+                                                                        <div class="history-item" style="display: flex; justify-content: space-between; margin-bottom: 0.5rem; font-size: 0.9rem;">
+                                                                            <span style="text-transform: capitalize;"><%= history.status %></span>
+                                                                            <span style="color: var(--text-light);"><%= new Date(history.timestamp).toLocaleString() %></span>
+                                                                        </div>
+                                                                        <% if (history.note) { %>
+                                                                            <p style="font-size: 0.8rem; color: var(--text-light); margin-bottom: 0.5rem;">
+                                                                                <%= history.note %>
+                                                                            </p>
+                                                                            <% } %>
+                                                                                <% }); %>
+                                                                </div>
+                                                            </div>
                                                             <% } %>
+
+                                                                <% if (order.status === 'pending' || order.status === 'processing') { %>
+                                                                    <button onclick="cancelOrder('<%= order._id %>')" class="btn" style="background: #f44336; color: white; width: 100%; margin-top: 1rem;">Cancel Order</button>
+                                                                    <% } %>
                                     </div>
                         </div>
                     </div>

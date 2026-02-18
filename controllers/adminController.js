@@ -36,7 +36,7 @@ exports.getDashboard = async(req, res) => {
             totalProducts,
             totalOrders,
             totalUsers,
-            totalRevenue: totalRevenue[0] ?.total || 0,
+            totalRevenue: totalRevenue[0]?.total || 0,
             recentOrders
         });
     } catch (error) {
@@ -239,7 +239,26 @@ exports.getOrders = async(req, res) => {
 exports.updateOrderStatus = async(req, res) => {
     try {
         const { status } = req.body;
-        await Order.findByIdAndUpdate(req.params.id, { status });
+        const order = await Order.findById(req.params.id);
+
+        if (!order) {
+            return res.json({ success: false, message: 'Order not found' });
+        }
+
+        // Only add to history if status is actually changing
+        if (order.status !== status) {
+            await Order.findByIdAndUpdate(req.params.id, {
+                status,
+                $push: {
+                    statusHistory: {
+                        status,
+                        timestamp: new Date(),
+                        note: `Status changed to ${status} by admin`
+                    }
+                }
+            });
+        }
+
         res.json({ success: true, message: 'Order status updated' });
     } catch (error) {
         console.error('Error updating order status:', error);

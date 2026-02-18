@@ -1,241 +1,287 @@
 <%- include('partials/header') %>
 
-<main>
-    <section class="section">
-        <div class="container">
-            <h1 class="section-title">My Account</h1>
-            
-            <div class="account-tabs">
-                <button class="tab-btn <%= activeTab === 'profile' ? 'active' : '' %>" onclick="switchTab('profile')">Profile</button>
-                <button class="tab-btn <%= activeTab === 'cart' ? 'active' : '' %>" onclick="switchTab('cart')">Cart (<%= cart.items ? cart.items.length : 0 %>)</button>
-                <button class="tab-btn <%= activeTab === 'wishlist' ? 'active' : '' %>" onclick="switchTab('wishlist')">Wishlist (<%= wishlist.products ? wishlist.products.length : 0 %>)</button>
-                <button class="tab-btn <%= activeTab === 'orders' ? 'active' : '' %>" onclick="switchTab('orders')">Orders (<%= orders ? orders.length : 0 %>)</button>
-            </div>
-            
-            <% if (typeof query !== 'undefined' && query.success) { %>
-            <div class="success-message"><%= query.success %></div>
-            <% } %>
-            <% if (typeof query !== 'undefined' && query.error) { %>
-            <div class="error-message"><%= query.error %></div>
-            <% } %>
-            
-            <!-- Profile Tab -->
-            <div id="profile-tab" class="tab-content <%= activeTab === 'profile' ? 'active' : '' %>">
-                <div style="max-width: 800px; margin: 0 auto;">
-                    <h2 style="font-family: 'Playfair Display', serif; margin-bottom: 1.5rem;">Profile Information</h2>
-                    <form action="/account/update" method="POST" class="form-container" style="max-width: 100%; margin: 0; padding: 2rem; box-shadow: var(--shadow);">
-                        <div class="form-group">
-                            <label>Full Name</label>
-                            <input type="text" name="name" value="<%= user.name %>" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Email</label>
-                            <input type="email" value="<%= user.email %>" disabled style="background: var(--accent-color);">
-                        </div>
-                        <div class="form-group">
-                            <label>Phone</label>
-                            <input type="text" name="phone" value="<%= user.phone || '' %>">
-                        </div>
-                        <h3 style="margin: 1.5rem 0 1rem; font-family: 'Playfair Display', serif;">Shipping Address</h3>
-                        <div class="form-group">
-                            <label>Street Address</label>
-                            <input type="text" name="street" value="<%= user.address && user.address.street ? user.address.street : '' %>">
-                        </div>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                            <div class="form-group">
-                                <label>City</label>
-                                <input type="text" name="city" value="<%= user.address && user.address.city ? user.address.city : '' %>">
-                            </div>
-                            <div class="form-group">
-                                <label>State</label>
-                                <input type="text" name="state" value="<%= user.address && user.address.state ? user.address.state : '' %>">
-                            </div>
-                        </div>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                            <div class="form-group">
-                                <label>Zip Code</label>
-                                <input type="text" name="zipCode" value="<%= user.address && user.address.zipCode ? user.address.zipCode : '' %>">
-                            </div>
-                            <div class="form-group">
-                                <label>Country</label>
-                                <input type="text" name="country" value="<%= user.address && user.address.country ? user.address.country : '' %>">
-                            </div>
-                        </div>
-                        <button type="submit" class="btn btn-add-cart" style="width: 100%;">Update Profile</button>
-                    </form>
+    <main>
+        <section class="section">
+            <div class="container">
+                <h1 class="section-title">My Account</h1>
+
+                <div class="account-tabs">
+                    <button class="tab-btn <%= activeTab === 'profile' ? 'active' : '' %>" onclick="switchTab('profile')">Profile</button>
+                    <button class="tab-btn <%= activeTab === 'cart' ? 'active' : '' %>" onclick="switchTab('cart')">Cart (<%= cart.items ? cart.items.length : 0 %>)</button>
+                    <button class="tab-btn <%= activeTab === 'wishlist' ? 'active' : '' %>" onclick="switchTab('wishlist')">Wishlist (<%= wishlist.products ? wishlist.products.length : 0 %>)</button>
+                    <button class="tab-btn <%= activeTab === 'orders' ? 'active' : '' %>" onclick="switchTab('orders')">Orders (<%= orders ? orders.length : 0 %>)</button>
                 </div>
-            </div>
-            
-            <!-- Cart Tab -->
-            <div id="cart-tab" class="tab-content <%= activeTab === 'cart' ? 'active' : '' %>">
-                <% if (cart.items && cart.items.length > 0) { %>
-                <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 2rem;">
-                    <div>
-                        <% cart.items.forEach(item => { %>
-                        <div class="cart-item">
-                            <img src="<%= item.product.images && item.product.images[0] ? item.product.images[0] : '/images/p1.jpeg' %>" alt="<%= item.product.name %>" class="cart-item-image">
-                            <div class="cart-item-details">
-                                <h3 class="cart-item-name"><%= item.product.name %></h3>
-                                <% if (item.size) { %>
-                                <p style="color: var(--text-light); margin-bottom: 0.5rem;">Size: <%= item.size %></p>
-                                <% } %>
-                                <% if (item.color) { %>
-                                <p style="color: var(--text-light); margin-bottom: 0.5rem;">Color: <%= item.color %></p>
-                                <% } %>
-                                <div class="cart-item-price">Rs.<%= (item.product.price * item.quantity).toFixed(2) %></div>
-                                <div class="quantity-control">
-                                    <button class="quantity-btn" onclick="updateCartQuantity('<%= item._id %>', <%= item.quantity - 1 %>)">-</button>
-                                    <span style="font-size: 1.2rem; font-weight: 600; min-width: 50px; text-align: center;"><%= item.quantity %></span>
-                                    <button class="quantity-btn" onclick="updateCartQuantity('<%= item._id %>', <%= item.quantity + 1 %>)">+</button>
-                                </div>
-                                <button class="btn" style="background: #f44336; color: white; margin-top: 1rem;" onclick="removeFromCart('<%= item._id %>')">Remove</button>
-                            </div>
-                        </div>
-                        <% }); %>
+
+                <% if (typeof query !== 'undefined' && query.success) { %>
+                    <div class="success-message">
+                        <%= query.success %>
                     </div>
-                    
-                    <div>
-                        <div class="cart-summary">
-                            <h2 style="margin-bottom: 1.5rem; font-family: 'Playfair Display', serif;">Order Summary</h2>
-                            <div class="summary-row">
-                                <span>Subtotal:</span>
-                                <span>Rs.<%= cartSubtotal.toFixed(2) %></span>
+                    <% } %>
+                        <% if (typeof query !== 'undefined' && query.error) { %>
+                            <div class="error-message">
+                                <%= query.error %>
                             </div>
-                            <div class="summary-row">
-                                <span>Shipping:</span>
-                                <span>Rs 250</span>
-                            </div>
-                            <div class="summary-total">
-                                <div class="summary-row">
-                                    <span>Total:</span>
-                                    <span>Rs.<%=  (cartSubtotal + 250 )  %></span>
-                                </div>
-                            </div>
-                            <a href="/orders/summary" class="btn btn-add-cart" style="width: 100%; text-align: center; margin-top: 1.5rem; display: block; text-decoration: none;">Proceed to Checkout</a>
-                        </div>
-                    </div>
-                </div>
-                <% } else { %>
-                <div style="text-align: center; padding: 5rem;">
-                    <h2 style="margin-bottom: 1rem; color: var(--text-light);">Your cart is empty</h2>
-                    <a href="/products" class="btn btn-add-cart">Continue Shopping</a>
-                </div>
-                <% } %>
-            </div>
-            
-            <!-- Wishlist Tab -->
-            <div id="wishlist-tab" class="tab-content <%= activeTab === 'wishlist' ? 'active' : '' %>">
-                <% if (wishlist.products && wishlist.products.length > 0) { %>
-                <div class="product-grid">
-                    <% wishlist.products.forEach(product => { %>
-                    <div class="product-card" onclick="window.location.href='/products/<%= product._id %>'">
-                        <img src="<%= product.images && product.images[0] ? product.images[0] : '/images/p1.jpeg' %>" alt="<%= product.name %>" class="product-image">
-                        <div class="product-info">
-                            <h3 class="product-name"><%= product.name %></h3>
-                            <div class="product-price">
-                                Rs.<%= product.price.toFixed(2) %>
-                                <% if (product.originalPrice && product.originalPrice > product.price) { %>
-                                <span class="original">Rs.<%= product.originalPrice.toFixed(2) %></span>
-                                <% } %>
-                            </div>
-                            <div class="product-actions">
-                                <button class="btn btn-add-cart" onclick="event.stopPropagation(); addToCart('<%= product._id %>')">Add to Cart</button>
-                                <button class="btn btn-wishlist" style="background: var(--primary-color); color: white;" onclick="event.stopPropagation(); removeFromWishlist('<%= product._id %>')">Remove</button>
-                            </div>
-                        </div>
-                    </div>
-                    <% }); %>
-                </div>
-                <% } else { %>
-                <div style="text-align: center; padding: 5rem;">
-                    <h2 style="margin-bottom: 1rem; color: var(--text-light);">Your wishlist is empty</h2>
-                    <a href="/products" class="btn btn-add-cart">Browse Products</a>
-                </div>
-                <% } %>
-            </div>
-            
-            <!-- Orders Tab -->
-            <div id="orders-tab" class="tab-content <%= activeTab === 'orders' ? 'active' : '' %>">
-                <% if (orders && orders.length > 0) { %>
-                <div style="display: flex; flex-direction: column; gap: 1.5rem;">
-                    <% orders.forEach(order => { %>
-                    <div style="background: var(--white); padding: 2rem; border-radius: 10px; box-shadow: var(--shadow);">
-                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1.5rem;">
-                            <div>
-                                <h3 style="font-family: 'Playfair Display', serif; margin-bottom: 0.5rem;">Order #<%= order._id.toString().substring(0, 8) %></h3>
-                                <p style="color: var(--text-light);">Placed on <%= new Date(order.createdAt).toLocaleDateString() %></p>
-                            </div>
-                            <div style="text-align: right;">
-                                <p style="font-size: 1.5rem; font-weight: 700; color: var(--secondary-color);">Rs.<%= order.total.toFixed(2) %></p>
-                                <p style="text-transform: capitalize; color: var(--text-light);"><%= order.status %></p>
-                            </div>
-                        </div>
-                        
-                        <div style="margin-bottom: 1.5rem;">
-                            <% order.items.forEach(item => { %>
-                            <div style="display: flex; gap: 1rem; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border-color);">
-                                <img src="<%= item.product.images && item.product.images[0] ? item.product.images[0] : '/images/p1.jpeg' %>" alt="<%= item.product.name %>" style="width: 100px; height: 100px; object-fit: cover; border-radius: 5px;">
-                                <div style="flex: 1;">
-                                    <h4><%= item.product.name %></h4>
-                                    <p style="color: var(--text-light);">Quantity: <%= item.quantity %></p>
-                                    <p style="color: var(--secondary-color); font-weight: 600;">Rs.<%= (item.price * item.quantity).toFixed(2) %></p>
-                                </div>
-                            </div>
-                            <% }); %>
-                        </div>
-                        
-                        <div style="display: flex; gap: 1rem;">
-                            <a href="/orders/<%= order._id %>" class="btn" style="background: var(--primary-color); color: white; flex: 1; text-align: center; text-decoration: none;">View Details</a>
-                            <% if (order.status === 'pending' || order.status === 'processing') { %>
-                            <button onclick="cancelOrder('<%= order._id %>')" class="btn" style="background: #f44336; color: white; flex: 1;">Cancel Order</button>
                             <% } %>
-                        </div>
-                    </div>
-                    <% }); %>
-                </div>
-                <% } else { %>
-                <div style="text-align: center; padding: 5rem;">
-                    <h2 style="margin-bottom: 1rem; color: var(--text-light);">No orders found</h2>
-                    <a href="/products" class="btn btn-add-cart">Start Shopping</a>
-                </div>
-                <% } %>
+
+                                <!-- Profile Tab -->
+                                <div id="profile-tab" class="tab-content <%= activeTab === 'profile' ? 'active' : '' %>">
+                                    <div style="max-width: 800px; margin: 0 auto;">
+                                        <h2 style="font-family: 'Playfair Display', serif; margin-bottom: 1.5rem;">Profile Information</h2>
+                                        <form action="/account/update" method="POST" class="form-container" style="max-width: 100%; margin: 0; padding: 2rem; box-shadow: var(--shadow);">
+                                            <div class="form-group">
+                                                <label>Full Name</label>
+                                                <input type="text" name="name" value="<%= user.name %>" required>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Email</label>
+                                                <input type="email" value="<%= user.email %>" disabled style="background: var(--accent-color);">
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Phone</label>
+                                                <input type="text" name="phone" value="<%= user.phone || '' %>">
+                                            </div>
+                                            <h3 style="margin: 1.5rem 0 1rem; font-family: 'Playfair Display', serif;">Shipping Address</h3>
+                                            <div class="form-group">
+                                                <label>Street Address</label>
+                                                <input type="text" name="street" value="<%= user.address && user.address.street ? user.address.street : '' %>">
+                                            </div>
+                                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                                                <div class="form-group">
+                                                    <label>City</label>
+                                                    <input type="text" name="city" value="<%= user.address && user.address.city ? user.address.city : '' %>">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label>State</label>
+                                                    <input type="text" name="state" value="<%= user.address && user.address.state ? user.address.state : '' %>">
+                                                </div>
+                                            </div>
+                                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                                                <div class="form-group">
+                                                    <label>Zip Code</label>
+                                                    <input type="text" name="zipCode" value="<%= user.address && user.address.zipCode ? user.address.zipCode : '' %>">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label>Country</label>
+                                                    <input type="text" name="country" value="<%= user.address && user.address.country ? user.address.country : '' %>">
+                                                </div>
+                                            </div>
+                                            <button type="submit" class="btn btn-add-cart" style="width: 100%;">Update Profile</button>
+                                        </form>
+                                    </div>
+                                </div>
+
+                                <!-- Cart Tab -->
+                                <div id="cart-tab" class="tab-content <%= activeTab === 'cart' ? 'active' : '' %>">
+                                    <% if (cart.items && cart.items.length > 0) { %>
+                                        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 2rem;">
+                                            <div>
+                                                <% cart.items.forEach(item => { %>
+                                                    <% if (item.productNotFound) { %>
+                                                        <div class="cart-item" style="opacity: 0.6; border: 2px solid #f44336;">
+                                                            <div class="cart-item-image" style="background: #f5f5f5; display: flex; align-items: center; justify-content: center; color: #f44336; font-weight: bold;">
+                                                                Product<br>Not Found
+                                                            </div>
+                                                            <div class="cart-item-details">
+                                                                <h3 class="cart-item-name" style="color: #f44336;">Product No Longer Available</h3>
+                                                                <p style="color: var(--text-light); margin-bottom: 0.5rem;">This product has been removed from our catalog</p>
+                                                                <button class="btn" style="background: #f44336; color: white; margin-top: 1rem;" onclick="removeFromCart('<%= item._id %>')">Remove from Cart</button>
+                                                            </div>
+                                                        </div>
+                                                        <% } else { %>
+                                                            <div class="cart-item">
+                                                                <img src="<%= item.product.images && item.product.images[0] ? item.product.images[0] : '/images/p1.jpeg' %>" alt="<%= item.product.name %>" class="cart-item-image">
+                                                                <div class="cart-item-details">
+                                                                    <h3 class="cart-item-name">
+                                                                        <%= item.product.name %>
+                                                                    </h3>
+                                                                    <% if (item.size) { %>
+                                                                        <p style="color: var(--text-light); margin-bottom: 0.5rem;">Size:
+                                                                            <%= item.size %>
+                                                                        </p>
+                                                                        <% } %>
+                                                                            <% if (item.color) { %>
+                                                                                <p style="color: var(--text-light); margin-bottom: 0.5rem;">Color:
+                                                                                    <%= item.color %>
+                                                                                </p>
+                                                                                <% } %>
+                                                                                    <% if (item.stockWarning) { %>
+                                                                                        <p style="color: #ff9800; margin-bottom: 0.5rem; font-weight: bold;">⚠️ Only
+                                                                                            <%= item.product.stock %> left in stock</p>
+                                                                                        <% } %>
+                                                                                            <div class="cart-item-price">Rs.
+                                                                                                <%= (item.product.price * item.quantity).toFixed(2) %>
+                                                                                            </div>
+                                                                                            <div class="quantity-control">
+                                                                                                <button class="quantity-btn" onclick="updateCartQuantity('<%= item._id %>', <%= item.quantity - 1 %>)">-</button>
+                                                                                                <span style="font-size: 1.2rem; font-weight: 600; min-width: 50px; text-align: center;"><%= item.quantity %></span>
+                                                                                                <button class="quantity-btn" onclick="updateCartQuantity('<%= item._id %>', <%= item.quantity + 1 %>)">+</button>
+                                                                                            </div>
+                                                                                            <button class="btn" style="background: #f44336; color: white; margin-top: 1rem;" onclick="removeFromCart('<%= item._id %>')">Remove</button>
+                                                                </div>
+                                                            </div>
+                                                            <% } %>
+                                                                <% }); %>
+                                            </div>
+
+                                            <div>
+                                                <div class="cart-summary">
+                                                    <h2 style="margin-bottom: 1.5rem; font-family: 'Playfair Display', serif;">Order Summary</h2>
+                                                    <div class="summary-row">
+                                                        <span>Subtotal:</span>
+                                                        <span>Rs.<%= cartSubtotal.toFixed(2) %></span>
+                                                    </div>
+                                                    <div class="summary-row">
+                                                        <span>Shipping:</span>
+                                                        <span>Rs 250</span>
+                                                    </div>
+                                                    <div class="summary-total">
+                                                        <div class="summary-row">
+                                                            <span>Total:</span>
+                                                            <span>Rs.<%=  (cartSubtotal + 250 )  %></span>
+                                                        </div>
+                                                    </div>
+                                                    <a href="/orders/summary" class="btn btn-add-cart" style="width: 100%; text-align: center; margin-top: 1.5rem; display: block; text-decoration: none;">Proceed to Checkout</a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <% } else { %>
+                                            <div style="text-align: center; padding: 5rem;">
+                                                <h2 style="margin-bottom: 1rem; color: var(--text-light);">Your cart is empty</h2>
+                                                <a href="/products" class="btn btn-add-cart">Continue Shopping</a>
+                                            </div>
+                                            <% } %>
+                                </div>
+
+                                <!-- Wishlist Tab -->
+                                <div id="wishlist-tab" class="tab-content <%= activeTab === 'wishlist' ? 'active' : '' %>">
+                                    <% if (wishlist.products && wishlist.products.length > 0) { %>
+                                        <div class="product-grid">
+                                            <% wishlist.products.forEach(product => { %>
+                                                <div class="product-card" onclick="window.location.href='/products/<%= product._id %>'">
+                                                    <img src="<%= product.images && product.images[0] ? product.images[0] : '/images/p1.jpeg' %>" alt="<%= product.name %>" class="product-image">
+                                                    <div class="product-info">
+                                                        <h3 class="product-name">
+                                                            <%= product.name %>
+                                                        </h3>
+                                                        <div class="product-price">
+                                                            Rs.
+                                                            <%= product.price.toFixed(2) %>
+                                                                <% if (product.originalPrice && product.originalPrice > product.price) { %>
+                                                                    <span class="original">Rs.<%= product.originalPrice.toFixed(2) %></span>
+                                                                    <% } %>
+                                                        </div>
+                                                        <div class="product-actions">
+                                                            <button class="btn btn-add-cart" onclick="event.stopPropagation(); addToCart('<%= product._id %>')">Add to Cart</button>
+                                                            <button class="btn btn-wishlist" style="background: var(--primary-color); color: white;" onclick="event.stopPropagation(); removeFromWishlist('<%= product._id %>')">Remove</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <% }); %>
+                                        </div>
+                                        <% } else { %>
+                                            <div style="text-align: center; padding: 5rem;">
+                                                <h2 style="margin-bottom: 1rem; color: var(--text-light);">Your wishlist is empty</h2>
+                                                <a href="/products" class="btn btn-add-cart">Browse Products</a>
+                                            </div>
+                                            <% } %>
+                                </div>
+
+                                <!-- Orders Tab -->
+                                <div id="orders-tab" class="tab-content <%= activeTab === 'orders' ? 'active' : '' %>">
+                                    <% if (orders && orders.length > 0) { %>
+                                        <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                                            <% orders.forEach(order => { %>
+                                                <div style="background: var(--white); padding: 2rem; border-radius: 10px; box-shadow: var(--shadow);">
+                                                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1.5rem;">
+                                                        <div>
+                                                            <h3 style="font-family: 'Playfair Display', serif; margin-bottom: 0.5rem;">Order #
+                                                                <%= order._id.toString().substring(0, 8) %>
+                                                            </h3>
+                                                            <p style="color: var(--text-light);">Placed on
+                                                                <%= new Date(order.createdAt).toLocaleDateString() %>
+                                                            </p>
+                                                        </div>
+                                                        <div style="text-align: right;">
+                                                            <p style="font-size: 1.5rem; font-weight: 700; color: var(--secondary-color);">Rs.
+                                                                <%= order.total.toFixed(2) %>
+                                                            </p>
+                                                            <p style="text-transform: capitalize; color: var(--text-light);">
+                                                                <%= order.status %>
+                                                            </p>
+                                                        </div>
+                                                    </div>
+
+                                                    <div style="margin-bottom: 1.5rem;">
+                                                        <% order.items.forEach(item => { %>
+                                                            <div style="display: flex; gap: 1rem; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border-color);">
+                                                                <img src="<%= item.product.images && item.product.images[0] ? item.product.images[0] : '/images/p1.jpeg' %>" alt="<%= item.product.name %>" style="width: 100px; height: 100px; object-fit: cover; border-radius: 5px;">
+                                                                <div style="flex: 1;">
+                                                                    <h4>
+                                                                        <%= item.product.name %>
+                                                                    </h4>
+                                                                    <p style="color: var(--text-light);">Quantity:
+                                                                        <%= item.quantity %>
+                                                                    </p>
+                                                                    <p style="color: var(--secondary-color); font-weight: 600;">Rs.
+                                                                        <%= (item.price * item.quantity).toFixed(2) %>
+                                                                    </p>
+                                                                </div>
+                                                            </div>
+                                                            <% }); %>
+                                                    </div>
+
+                                                    <div style="display: flex; gap: 1rem;">
+                                                        <a href="/orders/<%= order._id %>" class="btn" style="background: var(--primary-color); color: white; flex: 1; text-align: center; text-decoration: none;">View Details</a>
+                                                        <% if (order.status === 'pending' || order.status === 'processing') { %>
+                                                            <button onclick="cancelOrder('<%= order._id %>')" class="btn" style="background: #f44336; color: white; flex: 1;">Cancel Order</button>
+                                                            <% } %>
+                                                    </div>
+                                                </div>
+                                                <% }); %>
+                                        </div>
+                                        <% } else { %>
+                                            <div style="text-align: center; padding: 5rem;">
+                                                <h2 style="margin-bottom: 1rem; color: var(--text-light);">No orders found</h2>
+                                                <a href="/products" class="btn btn-add-cart">Start Shopping</a>
+                                            </div>
+                                            <% } %>
+                                </div>
             </div>
-        </div>
-    </section>
-</main>
+        </section>
+    </main>
 
-<script>
-function switchTab(tab) {
-    window.location.href = '/account?tab=' + tab;
-}
-
-async function cancelOrder(orderId) {
-    if (!confirm('Are you sure you want to cancel this order?')) {
-        return;
-    }
-    
-    try {
-        const response = await fetch(`/orders/${orderId}/cancel`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        });
-        
-        const data = await response.json();
-        
-        if (data.success) {
-            showNotification(data.message, 'success');
-            setTimeout(() => {
-                location.reload();
-            }, 1000);
-        } else {
-            showNotification(data.message, 'error');
+    <script>
+        function switchTab(tab) {
+            window.location.href = '/account?tab=' + tab;
         }
-    } catch (error) {
-        showNotification('Failed to cancel order', 'error');
-    }
-}
-</script>
 
-<%- include('partials/footer') %>
+        async function cancelOrder(orderId) {
+            if (!confirm('Are you sure you want to cancel this order?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/orders/${orderId}/cancel`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showNotification(data.message, 'success');
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1000);
+                } else {
+                    showNotification(data.message, 'error');
+                }
+            } catch (error) {
+                showNotification('Failed to cancel order', 'error');
+            }
+        }
+    </script>
+
+    <%- include('partials/footer') %>

@@ -17,7 +17,12 @@ exports.getOrderSummary = async(req, res) => {
 
         let subtotal = 0;
         cart.items.forEach(item => {
-            subtotal += item.product.price * item.quantity;
+            if (item.product) {
+                subtotal += item.product.price * item.quantity;
+            } else {
+                // Product no longer exists, redirect to cart
+                return res.redirect('/account?tab=cart&error=Some products in your cart are no longer available');
+            }
         });
         // Calculate delivery charge from product-level shippingFee
         const deliveryCharge = cart.items.reduce((sum, item) => {
@@ -56,7 +61,11 @@ exports.applyCoupon = async(req, res) => {
 
         let subtotal = 0;
         cart.items.forEach(item => {
-            subtotal += item.product.price * item.quantity;
+            if (item.product) {
+                subtotal += item.product.price * item.quantity;
+            } else {
+                return res.json({ success: false, message: 'Some products in your cart are no longer available' });
+            }
         });
         const deliveryCharge = cart.items.reduce((sum, item) => {
             const fee = (item.product && typeof item.product.shippingFee === 'number') ? item.product.shippingFee : 250;
@@ -136,6 +145,17 @@ exports.createOrder = async(req, res) => {
 
         let subtotal = 0;
         const orderItems = cart.items.map(item => {
+            if (!item.product) {
+                return res.render('order-summary', {
+                    title: 'Order Summary - SheenClassics',
+                    cart,
+                    subtotal: 0,
+                    discount: 0,
+                    total: 0,
+                    couponCode: couponCode || '',
+                    error: 'Some products in your cart are no longer available'
+                });
+            }
             const itemTotal = item.product.price * item.quantity;
             subtotal += itemTotal;
             return {
@@ -208,7 +228,12 @@ exports.createOrder = async(req, res) => {
             total,
             shippingAddress,
             paymentMethod,
-            paymentDetails
+            paymentDetails,
+            statusHistory: [{
+                status: 'pending',
+                timestamp: new Date(),
+                note: 'Order created'
+            }]
         });
 
         await order.save();
@@ -325,6 +350,11 @@ exports.cancelOrder = async(req, res) => {
 
         // Update order status (skip validation so old orders without paymentMethod can be updated)
         order.status = 'cancelled';
+        order.statusHistory.push({
+            status: 'cancelled',
+            timestamp: new Date(),
+            note: 'Order cancelled by user'
+        });
         await order.save({ validateBeforeSave: false });
 
         res.json({ success: true, message: 'Order cancelled successfully' });

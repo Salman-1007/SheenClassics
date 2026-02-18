@@ -66,6 +66,18 @@ const orderSchema = new mongoose.Schema({
         enum: ['pending', 'processing', 'shipped', 'delivered', 'cancelled'],
         default: 'pending'
     },
+    statusHistory: [{
+        status: {
+            type: String,
+            enum: ['pending', 'processing', 'shipped', 'delivered', 'cancelled'],
+            required: true
+        },
+        timestamp: {
+            type: Date,
+            default: Date.now
+        },
+        note: String
+    }],
     createdAt: {
         type: Date,
         default: Date.now
