@@ -11,8 +11,8 @@ const checkCartAccess = (req, res) => {
     res.redirect('/account?tab=cart');
 };
 
-// Cart page - check if logged in
-router.get('/', checkCartAccess);
+// Cart page - allow both authenticated and anonymous users
+router.get('/', cartController.getCart);
 
 // Add to cart - ALLOW unauthenticated users (store in session)
 router.post('/add', cartController.addToCart);

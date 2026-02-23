@@ -35,9 +35,9 @@
                 <ul class="nav-menu" id="nav-menu">
                     <li><a href="/" class="nav-link">Home</a></li>
                     <li><a href="/products" class="nav-link">Products</a></li>
+                    <li><a href="/account" class="nav-link">Account</a></li>
 
                     <% if (typeof session !== 'undefined' && session.userId) { %>
-                        <li><a href="/account" class="nav-link">Account</a></li>
 
                         <% if (session.isAdmin) { %>
                             <li>
@@ -76,3 +76,4 @@
     <!-- ── Toast Notification ── -->
     <div id="notification" style="display:none;position:fixed;top:88px;right:20px;z-index:9999;max-width:320px;min-width:240px;padding:1rem 1.25rem;border-radius:var(--radius-lg);box-shadow:var(--shadow-lg);font-size:0.85rem;font-weight:500;font-family:var(--font-body);display:flex;align-items:center;gap:0.6rem;transition:all 0.3s var(--ease);">
     </div>
+

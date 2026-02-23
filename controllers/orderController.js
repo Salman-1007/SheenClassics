@@ -5,14 +5,20 @@ const Product = require('../models/Product');
 
 exports.getOrderSummary = async(req, res) => {
     try {
-        if (!req.session.userId) {
-            return res.redirect('/auth/login');
+        // Find cart by user or sessionId
+        let cart;
+        if (req.session.userId) {
+            cart = await Cart.findOne({ user: req.session.userId }).populate('items.product');
+        } else {
+            cart = await Cart.findOne({ sessionId: req.session.id }).populate('items.product');
         }
 
-        const cart = await Cart.findOne({ user: req.session.userId }).populate('items.product');
-
         if (!cart || cart.items.length === 0) {
-            return res.redirect('/account?tab=cart');
+            if (req.session.userId) {
+                return res.redirect('/account?tab=cart');
+            } else {
+                return res.redirect('/?showCart=true');
+            }
         }
 
         let subtotal = 0;
@@ -21,7 +27,11 @@ exports.getOrderSummary = async(req, res) => {
                 subtotal += item.product.price * item.quantity;
             } else {
                 // Product no longer exists, redirect to cart
-                return res.redirect('/account?tab=cart&error=Some products in your cart are no longer available');
+                if (req.session.userId) {
+                    return res.redirect('/account?tab=cart&error=Some products in your cart are no longer available');
+                } else {
+                    return res.redirect('/?showCart=true&error=Some products in your cart are no longer available');
+                }
             }
         });
         // Calculate delivery charge from product-level shippingFee
@@ -39,7 +49,8 @@ exports.getOrderSummary = async(req, res) => {
             discount,
             deliveryCharge,
             total,
-            couponCode: ''
+            couponCode: '',
+            isGuest: !req.session.userId
         });
     } catch (error) {
         console.error('Error fetching order summary:', error);
@@ -53,7 +64,14 @@ exports.getOrderSummary = async(req, res) => {
 exports.applyCoupon = async(req, res) => {
     try {
         const { couponCode } = req.body;
-        const cart = await Cart.findOne({ user: req.session.userId }).populate('items.product');
+
+        // Find cart by user or sessionId
+        let cart;
+        if (req.session.userId) {
+            cart = await Cart.findOne({ user: req.session.userId }).populate('items.product');
+        } else {
+            cart = await Cart.findOne({ sessionId: req.session.id }).populate('items.product');
+        }
 
         if (!cart || cart.items.length === 0) {
             return res.json({ success: false, message: 'Cart is empty' });
@@ -103,16 +121,39 @@ exports.applyCoupon = async(req, res) => {
 
 exports.createOrder = async(req, res) => {
     try {
-        if (!req.session.userId) {
-            return res.redirect('/auth/login');
+        const { shippingAddress, couponCode, paymentMethod, jazzcashNumber, whatsappNumber, guestName, guestEmail, guestPhone } = req.body;
+
+        // Find cart by user or sessionId
+        let cart;
+        if (req.session.userId) {
+            cart = await Cart.findOne({ user: req.session.userId }).populate('items.product');
+        } else {
+            cart = await Cart.findOne({ sessionId: req.session.id }).populate('items.product');
         }
 
-        const { shippingAddress, couponCode, paymentMethod, jazzcashNumber, whatsappNumber } = req.body;
-
-        const cart = await Cart.findOne({ user: req.session.userId }).populate('items.product');
-
         if (!cart || cart.items.length === 0) {
-            return res.redirect('/account?tab=cart');
+            if (req.session.userId) {
+                return res.redirect('/account?tab=cart');
+            } else {
+                return res.redirect('/?showCart=true');
+            }
+        }
+
+        // For guest orders, validate required guest info
+        if (!req.session.userId) {
+            if (!guestName || !guestEmail || !guestPhone) {
+                return res.render('order-summary', {
+                    title: 'Order Summary - SheenClassics',
+                    cart,
+                    subtotal: 0,
+                    discount: 0,
+                    deliveryCharge: 0,
+                    total: 0,
+                    couponCode: couponCode || '',
+                    error: 'Please provide your name, email, and phone number to place the order.',
+                    isGuest: true
+                });
+            }
         }
 
         // Validate stock availability before creating order
@@ -219,7 +260,12 @@ exports.createOrder = async(req, res) => {
         };
 
         const order = new Order({
-            user: req.session.userId,
+            user: req.session.userId || null,
+            guestInfo: req.session.userId ? null : {
+                name: guestName,
+                email: guestEmail,
+                phone: guestPhone
+            },
             items: orderItems,
             subtotal,
             discount,

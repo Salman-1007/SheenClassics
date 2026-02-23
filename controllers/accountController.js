@@ -5,28 +5,36 @@ const Wishlist = require('../models/Wishlist');
 
 exports.getAccount = async(req, res) => {
     try {
-        if (!req.session.userId) {
-            return res.redirect('/auth/login');
-        }
-
         const { tab } = req.query;
-        const activeTab = tab || 'profile';
+        const activeTab = tab || (req.session.userId ? 'profile' : 'cart');
 
-        const user = await User.findById(req.session.userId);
-
-        if (!user) {
-            req.session.destroy();
-            return res.redirect('/auth/login');
+        let user = null;
+        if (req.session.userId) {
+            user = await User.findById(req.session.userId);
+            if (!user) {
+                req.session.destroy();
+                return res.redirect('/auth/login');
+            }
         }
 
         // Get cart
-        let cart = await Cart.findOne({ user: req.session.userId }).populate('items.product');
+        let cart;
+        if (req.session.userId) {
+            cart = await Cart.findOne({ user: req.session.userId }).populate('items.product');
+        } else {
+            cart = await Cart.findOne({ sessionId: req.session.id }).populate('items.product');
+        }
         if (!cart) {
             cart = { items: [] };
         }
 
         // Get wishlist
-        let wishlist = await Wishlist.findOne({ user: req.session.userId }).populate('products');
+        let wishlist;
+        if (req.session.userId) {
+            wishlist = await Wishlist.findOne({ user: req.session.userId }).populate('products');
+        } else {
+            wishlist = await Wishlist.findOne({ sessionId: req.session.id }).populate('products');
+        }
         if (!wishlist) {
             wishlist = { products: [] };
         }

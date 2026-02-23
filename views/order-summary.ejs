@@ -1,270 +1,292 @@
 <%- include('partials/header') %>
 
-<main>
-    <section class="section" style="padding-top:3rem;">
-        <div class="container" style="max-width:1100px;">
+    <main>
+        <section class="section" style="padding-top:3rem;">
+            <div class="container" style="max-width:1100px;">
 
-            <!-- Page Header -->
-            <div class="section-header reveal" style="margin-bottom:3rem;">
-                <span class="section-eyebrow">Almost There</span>
-                <h1 class="section-title">Order <em>Summary</em></h1>
-                <div class="section-divider"></div>
-            </div>
-
-            <% if (typeof error !== 'undefined' && error) { %>
-            <div class="error-message reveal" style="margin-bottom:1.5rem;">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
-                <%= error %>
-            </div>
-            <% } %>
-
-            <div style="display:grid;grid-template-columns:1fr 380px;gap:3rem;align-items:start;">
-
-                <!-- ── Left: Items + Shipping Form ── -->
-                <div>
-                    <!-- Order Items -->
-                    <div class="reveal" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-xl);overflow:hidden;margin-bottom:2rem;">
-                        <div style="padding:1.4rem 2rem;border-bottom:1px solid var(--border);">
-                            <h2 style="font-family:var(--font-serif);font-size:1.4rem;font-weight:400;color:var(--primary);">Order Items</h2>
-                        </div>
-                        <div style="padding:1rem 2rem;">
-                            <% cart.items.forEach((item, i) => { %>
-                            <div style="display:flex;gap:1.2rem;align-items:center;padding:1rem 0;border-bottom:<%= i < cart.items.length - 1 ? '1px solid var(--border)' : 'none' %>;">
-                                <div style="width:64px;height:80px;border-radius:var(--radius);overflow:hidden;flex-shrink:0;border:1px solid var(--border);">
-                                    <img src="<%= item.product.images && item.product.images[0] ? item.product.images[0] : '/images/p1.jpeg' %>"
-                                         alt="<%= item.product.name %>"
-                                         style="width:100%;height:100%;object-fit:cover;">
-                                </div>
-                                <div style="flex:1;min-width:0;">
-                                    <h3 style="font-family:var(--font-serif);font-size:1rem;font-weight:400;color:var(--primary);margin-bottom:0.25rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"><%= item.product.name %></h3>
-                                    <p style="font-size:0.78rem;color:var(--text-muted);">
-                                        Qty: <%= item.quantity %>
-                                        &nbsp;·&nbsp; Stock: <%= item.product.stock %>
-                                    </p>
-                                </div>
-                                <div style="font-weight:600;font-size:0.95rem;color:var(--primary);flex-shrink:0;">
-                                    Rs <%= (item.product.price * item.quantity).toFixed(2) %>
-                                </div>
-                            </div>
-                            <% }); %>
-                        </div>
-                    </div>
-
-                    <!-- Shipping Address Form -->
-                    <form action="/orders/create" method="POST" id="order-form">
-                        <div class="reveal" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-xl);padding:2rem;margin-bottom:2rem;">
-                            <h2 style="font-family:var(--font-serif);font-size:1.4rem;font-weight:400;color:var(--primary);margin-bottom:0.3rem;">Shipping Address</h2>
-                            <p style="font-size:0.82rem;color:var(--text-muted);margin-bottom:1.8rem;">Where should we send your order?</p>
-
-                            <div class="form-group">
-                                <label>Street Address</label>
-                                <input type="text" name="shippingAddress[street]" required placeholder="House / Flat, Street name, Area">
-                            </div>
-                            <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
-                                <div class="form-group">
-                                    <label>City</label>
-                                    <input type="text" name="shippingAddress[city]" required placeholder="e.g. Lahore">
-                                </div>
-                                <div class="form-group">
-                                    <label>State / Province</label>
-                                    <input type="text" name="shippingAddress[state]" required placeholder="e.g. Punjab">
-                                </div>
-                            </div>
-                            <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
-                                <div class="form-group">
-                                    <label>Zip / Postal Code</label>
-                                    <input type="text" name="shippingAddress[zipCode]" required placeholder="e.g. 54000">
-                                </div>
-                                <div class="form-group">
-                                    <label>Country</label>
-                                    <input type="text" name="shippingAddress[country]" required placeholder="Pakistan" value="Pakistan">
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- WhatsApp Confirmation -->
-                        <div class="reveal reveal-delay-1" style="background:var(--surface);border:1.5px solid var(--border-gold);border-radius:var(--radius-xl);padding:2rem;">
-                            <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1.2rem;">
-                                <div style="width:38px;height:38px;background:rgba(37,211,102,0.1);border:1px solid rgba(37,211,102,0.25);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#25d366" stroke-width="1.8"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
-                                </div>
-                                <div>
-                                    <h3 style="font-family:var(--font-serif);font-size:1.15rem;font-weight:400;color:var(--primary);margin-bottom:0.15rem;">WhatsApp Confirmation</h3>
-                                    <p style="font-size:0.78rem;color:var(--text-muted);">We'll confirm your order via WhatsApp</p>
-                                </div>
-                            </div>
-
-                            <p style="font-size:0.85rem;color:var(--text-secondary);line-height:1.7;margin-bottom:1.2rem;padding:1rem;background:var(--cream);border-radius:var(--radius);border-left:3px solid var(--gold);">
-                                After placing your order, our team will contact you on WhatsApp to <strong>confirm the order</strong> and <strong>finalise payment</strong>. Please ensure the number is active and reachable.
-                            </p>
-
-                            <div class="form-group" style="margin-bottom:0;">
-                                <label>Your WhatsApp Number</label>
-                                <div style="position:relative;">
-                                    <span style="position:absolute;left:0.9rem;top:50%;transform:translateY(-50%);font-size:0.85rem;color:var(--text-muted);pointer-events:none;">+92</span>
-                                    <input type="text" name="whatsappNumber" id="whatsapp-number"
-                                           placeholder="3XXXXXXXXX"
-                                           required
-                                           style="padding-left:3rem;">
-                                </div>
-                                <p id="whatsapp-helper" style="font-size:0.75rem;color:var(--text-muted);margin-top:0.4rem;">
-                                    Format: <code style="background:var(--cream);padding:1px 5px;border-radius:3px;">03XXXXXXXXX</code> or <code style="background:var(--cream);padding:1px 5px;border-radius:3px;">+923XXXXXXXXXX</code>
-                                </p>
-                            </div>
-
-                            <input type="hidden" name="paymentMethod" value="whatsapp">
-                            <input type="hidden" name="couponCode" id="applied-coupon" value="">
-                        </div>
-                    </form>
+                <!-- Page Header -->
+                <div class="section-header reveal" style="margin-bottom:3rem;">
+                    <span class="section-eyebrow">Almost There</span>
+                    <h1 class="section-title">Order <em>Summary</em></h1>
+                    <div class="section-divider"></div>
                 </div>
 
-                <!-- ── Right: Summary Sidebar ── -->
-                <div style="position:sticky;top:92px;">
-                    <div class="cart-summary reveal reveal-delay-2">
-                        <h3>Price Breakdown</h3>
+                <% if (typeof error !== 'undefined' && error) { %>
+                    <div class="error-message reveal" style="margin-bottom:1.5rem;">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+                        <%= error %>
+                    </div>
+                    <% } %>
 
-                        <div class="summary-row">
-                            <span>Subtotal</span>
-                            <span>Rs <%= subtotal.toFixed(2) %></span>
-                        </div>
+                        <div style="display:grid;grid-template-columns:1fr 380px;gap:3rem;align-items:start;">
 
-                        <% if (discount > 0) { %>
-                        <div class="summary-row" style="color:#1a7a45;">
-                            <span>Discount</span>
-                            <span>− Rs <%= discount.toFixed(2) %></span>
-                        </div>
-                        <% } %>
+                            <!-- ── Left: Items + Shipping Form ── -->
+                            <div>
+                                <!-- Order Items -->
+                                <div class="reveal" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-xl);overflow:hidden;margin-bottom:2rem;">
+                                    <div style="padding:1.4rem 2rem;border-bottom:1px solid var(--border);">
+                                        <h2 style="font-family:var(--font-serif);font-size:1.4rem;font-weight:400;color:var(--primary);">Order Items</h2>
+                                    </div>
+                                    <div style="padding:1rem 2rem;">
+                                        <% cart.items.forEach((item, i) => { %>
+                                            <div style="display:flex;gap:1.2rem;align-items:center;padding:1rem 0;border-bottom:<%= i < cart.items.length - 1 ? '1px solid var(--border)' : 'none' %>;">
+                                                <div style="width:64px;height:80px;border-radius:var(--radius);overflow:hidden;flex-shrink:0;border:1px solid var(--border);">
+                                                    <img src="<%= item.product.images && item.product.images[0] ? item.product.images[0] : '/images/p1.jpeg' %>" alt="<%= item.product.name %>" style="width:100%;height:100%;object-fit:cover;">
+                                                </div>
+                                                <div style="flex:1;min-width:0;">
+                                                    <h3 style="font-family:var(--font-serif);font-size:1rem;font-weight:400;color:var(--primary);margin-bottom:0.25rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                                                        <%= item.product.name %>
+                                                    </h3>
+                                                    <p style="font-size:0.78rem;color:var(--text-muted);">
+                                                        Qty:
+                                                        <%= item.quantity %>
+                                                            &nbsp;·&nbsp; Stock:
+                                                            <%= item.product.stock %>
+                                                    </p>
+                                                </div>
+                                                <div style="font-weight:600;font-size:0.95rem;color:var(--primary);flex-shrink:0;">
+                                                    Rs
+                                                    <%= (item.product.price * item.quantity).toFixed(2) %>
+                                                </div>
+                                            </div>
+                                            <% }); %>
+                                    </div>
+                                </div>
 
-                        <div class="summary-row">
-                            <span>Shipping</span>
-                            <span id="order-shipping">Rs <%= (typeof deliveryCharge !== 'undefined' ? deliveryCharge : 0).toFixed(2) %></span>
-                        </div>
+                                <!-- Shipping Address Form -->
+                                <form action="/orders/create" method="POST" id="order-form">
 
-                        <div class="summary-row total">
-                            <span>Total</span>
-                            <span id="total" style="color:var(--gold);">Rs <%= total.toFixed(2) %></span>
-                        </div>
+                                    <% if (typeof isGuest !== 'undefined' && isGuest) { %>
+                                        <!-- Guest Information -->
+                                        <div class="reveal" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-xl);padding:2rem;margin-bottom:2rem;">
+                                            <h2 style="font-family:var(--font-serif);font-size:1.4rem;font-weight:400;color:var(--primary);margin-bottom:0.3rem;">Contact Information</h2>
+                                            <p style="font-size:0.82rem;color:var(--text-muted);margin-bottom:1.8rem;">Please provide your details to place the order</p>
 
-                        <!-- Coupon -->
-                        <div style="margin-top:1.5rem;padding:1.2rem;background:var(--cream);border:1.5px dashed var(--border-gold);border-radius:var(--radius);">
-                            <p style="font-size:0.72rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted);margin-bottom:0.75rem;">Have a Coupon?</p>
-                            <div style="display:flex;gap:0.5rem;">
-                                <input type="text" id="coupon-code" placeholder="Enter code"
-                                    style="flex:1;padding:0.6rem 0.8rem;background:#fff;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:var(--font-body);font-size:0.85rem;transition:all 0.2s;"
-                                    onfocus="this.style.borderColor='var(--gold)';this.style.boxShadow='0 0 0 3px var(--gold-pale)'"
-                                    onblur="this.style.borderColor='var(--border)';this.style.boxShadow='none'">
-                                <button type="button" onclick="applyCoupon()"
-                                    style="padding:0.6rem 1rem;background:var(--primary);color:#fff;border:none;border-radius:var(--radius-sm);font-family:var(--font-body);font-size:0.78rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;cursor:pointer;transition:all 0.2s;flex-shrink:0;"
-                                    onmouseover="this.style.background='var(--gold)';this.style.color='var(--primary)'"
-                                    onmouseout="this.style.background='var(--primary)';this.style.color='#fff'">
+                                            <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+                                                <div class="form-group">
+                                                    <label>Full Name</label>
+                                                    <input type="text" name="guestName" required placeholder="Your full name">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label>Email Address</label>
+                                                    <input type="email" name="guestEmail" required placeholder="your@email.com">
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Phone Number</label>
+                                                <input type="tel" name="guestPhone" required placeholder="03XXXXXXXXX">
+                                            </div>
+                                        </div>
+                                        <% } %>
+
+                                            <div class="reveal" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-xl);padding:2rem;margin-bottom:2rem;">
+                                                <h2 style="font-family:var(--font-serif);font-size:1.4rem;font-weight:400;color:var(--primary);margin-bottom:0.3rem;">Shipping Address</h2>
+                                                <p style="font-size:0.82rem;color:var(--text-muted);margin-bottom:1.8rem;">Where should we send your order?</p>
+
+                                                <div class="form-group">
+                                                    <label>Street Address</label>
+                                                    <input type="text" name="shippingAddress[street]" required placeholder="House / Flat, Street name, Area">
+                                                </div>
+                                                <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+                                                    <div class="form-group">
+                                                        <label>City</label>
+                                                        <input type="text" name="shippingAddress[city]" required placeholder="e.g. Lahore">
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label>State / Province</label>
+                                                        <input type="text" name="shippingAddress[state]" required placeholder="e.g. Punjab">
+                                                    </div>
+                                                </div>
+                                                <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+                                                    <div class="form-group">
+                                                        <label>Zip / Postal Code</label>
+                                                        <input type="text" name="shippingAddress[zipCode]" required placeholder="e.g. 54000">
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label>Country</label>
+                                                        <input type="text" name="shippingAddress[country]" required placeholder="Pakistan" value="Pakistan">
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- WhatsApp Confirmation -->
+                                            <div class="reveal reveal-delay-1" style="background:var(--surface);border:1.5px solid var(--border-gold);border-radius:var(--radius-xl);padding:2rem;">
+                                                <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1.2rem;">
+                                                    <div style="width:38px;height:38px;background:rgba(37,211,102,0.1);border:1px solid rgba(37,211,102,0.25);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#25d366" stroke-width="1.8"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+                                                    </div>
+                                                    <div>
+                                                        <h3 style="font-family:var(--font-serif);font-size:1.15rem;font-weight:400;color:var(--primary);margin-bottom:0.15rem;">WhatsApp Confirmation</h3>
+                                                        <p style="font-size:0.78rem;color:var(--text-muted);">We'll confirm your order via WhatsApp</p>
+                                                    </div>
+                                                </div>
+
+                                                <p style="font-size:0.85rem;color:var(--text-secondary);line-height:1.7;margin-bottom:1.2rem;padding:1rem;background:var(--cream);border-radius:var(--radius);border-left:3px solid var(--gold);">
+                                                    After placing your order, our team will contact you on WhatsApp to <strong>confirm the order</strong> and <strong>finalise payment</strong>. Please ensure the number is active and reachable.
+                                                </p>
+
+                                                <div class="form-group" style="margin-bottom:0;">
+                                                    <label>Your WhatsApp Number</label>
+                                                    <div style="position:relative;">
+                                                        <span style="position:absolute;left:0.9rem;top:50%;transform:translateY(-50%);font-size:0.85rem;color:var(--text-muted);pointer-events:none;">+92</span>
+                                                        <input type="text" name="whatsappNumber" id="whatsapp-number" placeholder="3XXXXXXXXX" required style="padding-left:3rem;">
+                                                    </div>
+                                                    <p id="whatsapp-helper" style="font-size:0.75rem;color:var(--text-muted);margin-top:0.4rem;">
+                                                        Format: <code style="background:var(--cream);padding:1px 5px;border-radius:3px;">03XXXXXXXXX</code> or <code style="background:var(--cream);padding:1px 5px;border-radius:3px;">+923XXXXXXXXXX</code>
+                                                    </p>
+                                                </div>
+
+                                                <input type="hidden" name="paymentMethod" value="whatsapp">
+                                                <input type="hidden" name="couponCode" id="applied-coupon" value="">
+                                            </div>
+                                </form>
+                            </div>
+
+                            <!-- ── Right: Summary Sidebar ── -->
+                            <div style="position:sticky;top:92px;">
+                                <div class="cart-summary reveal reveal-delay-2">
+                                    <h3>Price Breakdown</h3>
+
+                                    <div class="summary-row">
+                                        <span>Subtotal</span>
+                                        <span>Rs <%= subtotal.toFixed(2) %></span>
+                                    </div>
+
+                                    <% if (discount > 0) { %>
+                                        <div class="summary-row" style="color:#1a7a45;">
+                                            <span>Discount</span>
+                                            <span>− Rs <%= discount.toFixed(2) %></span>
+                                        </div>
+                                        <% } %>
+
+                                            <div class="summary-row">
+                                                <span>Shipping</span>
+                                                <span id="order-shipping">Rs <%= (typeof deliveryCharge !== 'undefined' ? deliveryCharge : 0).toFixed(2) %></span>
+                                            </div>
+
+                                            <div class="summary-row total">
+                                                <span>Total</span>
+                                                <span id="total" style="color:var(--gold);">Rs <%= total.toFixed(2) %></span>
+                                            </div>
+
+                                            <!-- Coupon -->
+                                            <div style="margin-top:1.5rem;padding:1.2rem;background:var(--cream);border:1.5px dashed var(--border-gold);border-radius:var(--radius);">
+                                                <p style="font-size:0.72rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted);margin-bottom:0.75rem;">Have a Coupon?</p>
+                                                <div style="display:flex;gap:0.5rem;">
+                                                    <input type="text" id="coupon-code" placeholder="Enter code" style="flex:1;padding:0.6rem 0.8rem;background:#fff;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:var(--font-body);font-size:0.85rem;transition:all 0.2s;" onfocus="this.style.borderColor='var(--gold)';this.style.boxShadow='0 0 0 3px var(--gold-pale)'"
+                                                        onblur="this.style.borderColor='var(--border)';this.style.boxShadow='none'">
+                                                    <button type="button" onclick="applyCoupon()" style="padding:0.6rem 1rem;background:var(--primary);color:#fff;border:none;border-radius:var(--radius-sm);font-family:var(--font-body);font-size:0.78rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;cursor:pointer;transition:all 0.2s;flex-shrink:0;"
+                                                        onmouseover="this.style.background='var(--gold)';this.style.color='var(--primary)'" onmouseout="this.style.background='var(--primary)';this.style.color='#fff'">
                                     Apply
                                 </button>
-                            </div>
-                            <p id="coupon-msg" style="font-size:0.75rem;margin-top:0.5rem;display:none;"></p>
-                        </div>
+                                                </div>
+                                                <p id="coupon-msg" style="font-size:0.75rem;margin-top:0.5rem;display:none;"></p>
+                                            </div>
 
-                        <!-- Place Order CTA -->
-                        <button type="submit" form="order-form"
-                            class="btn btn-add-cart"
-                            id="place-order-btn"
-                            style="width:100%;margin-top:1.5rem;padding:1rem;font-size:0.9rem;border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;gap:8px;">
+                                            <!-- Place Order CTA -->
+                                            <button type="submit" form="order-form" class="btn btn-add-cart" id="place-order-btn" style="width:100%;margin-top:1.5rem;padding:1rem;font-size:0.9rem;border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;gap:8px;">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
                             <span>Place Order</span>
                         </button>
 
-                        <p style="text-align:center;font-size:0.72rem;color:var(--text-muted);margin-top:0.8rem;display:flex;align-items:center;justify-content:center;gap:4px;">
-                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                            Your information is safe & secure
-                        </p>
-                    </div>
-                </div>
+                                            <p style="text-align:center;font-size:0.72rem;color:var(--text-muted);margin-top:0.8rem;display:flex;align-items:center;justify-content:center;gap:4px;">
+                                                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Your information
+                                                is safe & secure
+                                            </p>
+                                </div>
+                            </div>
+                        </div>
             </div>
-        </div>
-    </section>
-</main>
+        </section>
+    </main>
 
-<!-- Responsive stack -->
-<style>
-@media (max-width: 768px) {
-    .order-summary-grid { grid-template-columns: 1fr !important; }
-}
-</style>
+    <!-- Responsive stack -->
+    <style>
+        @media (max-width: 768px) {
+            .order-summary-grid {
+                grid-template-columns: 1fr !important;
+            }
+        }
+    </style>
 
-<script>
-// ── WhatsApp form validation
-document.getElementById('order-form').addEventListener('submit', function(e) {
-    const input  = document.getElementById('whatsapp-number');
-    const helper = document.getElementById('whatsapp-helper');
-    const raw    = (input.value || '').trim();
-    const pattern = /^(03\d{9}|\+92\d{10})$/;
+    <script>
+        // ── WhatsApp form validation
+        document.getElementById('order-form').addEventListener('submit', function(e) {
+            const input = document.getElementById('whatsapp-number');
+            const helper = document.getElementById('whatsapp-helper');
+            const raw = (input.value || '').trim();
+            const pattern = /^(03\d{9}|\+92\d{10})$/;
 
-    if (!raw) {
-        e.preventDefault();
-        input.style.borderColor = '#e74c3c';
-        input.style.boxShadow   = '0 0 0 3px rgba(231,76,60,0.12)';
-        helper.textContent = '⚠ Please enter your WhatsApp number.';
-        helper.style.color = '#c0392b';
-        helper.style.display = 'block';
-        input.focus();
-        return;
-    }
+            if (!raw) {
+                e.preventDefault();
+                input.style.borderColor = '#e74c3c';
+                input.style.boxShadow = '0 0 0 3px rgba(231,76,60,0.12)';
+                helper.textContent = '⚠ Please enter your WhatsApp number.';
+                helper.style.color = '#c0392b';
+                helper.style.display = 'block';
+                input.focus();
+                return;
+            }
 
-    if (!pattern.test(raw)) {
-        e.preventDefault();
-        input.style.borderColor = '#e74c3c';
-        input.style.boxShadow   = '0 0 0 3px rgba(231,76,60,0.12)';
-        helper.textContent = '⚠ Use format: 03XXXXXXXXX or +923XXXXXXXXXX';
-        helper.style.color = '#c0392b';
-        helper.style.display = 'block';
-        input.focus();
-        return;
-    }
+            if (!pattern.test(raw)) {
+                e.preventDefault();
+                input.style.borderColor = '#e74c3c';
+                input.style.boxShadow = '0 0 0 3px rgba(231,76,60,0.12)';
+                helper.textContent = '⚠ Use format: 03XXXXXXXXX or +923XXXXXXXXXX';
+                helper.style.color = '#c0392b';
+                helper.style.display = 'block';
+                input.focus();
+                return;
+            }
 
-    // Valid — show loading state
-    input.style.borderColor = '#27ae60';
-    input.style.boxShadow   = '0 0 0 3px rgba(39,174,96,0.12)';
-    helper.textContent = '✓ Looks good! Placing your order…';
-    helper.style.color = '#1a7a45';
-    helper.style.display = 'block';
+            // Valid — show loading state
+            input.style.borderColor = '#27ae60';
+            input.style.boxShadow = '0 0 0 3px rgba(39,174,96,0.12)';
+            helper.textContent = '✓ Looks good! Placing your order…';
+            helper.style.color = '#1a7a45';
+            helper.style.display = 'block';
 
-    const btn = document.getElementById('place-order-btn');
-    btn.innerHTML = '<span>Processing…</span>';
-    btn.style.opacity = '0.75';
-    btn.disabled = true;
-});
+            const btn = document.getElementById('place-order-btn');
+            btn.innerHTML = '<span>Processing…</span>';
+            btn.style.opacity = '0.75';
+            btn.disabled = true;
+        });
 
-// ── Live validation feedback
-document.getElementById('whatsapp-number').addEventListener('input', function() {
-    this.style.borderColor = 'var(--border)';
-    this.style.boxShadow   = 'none';
-    const helper = document.getElementById('whatsapp-helper');
-    helper.style.display = 'none';
-});
+        // ── Live validation feedback
+        document.getElementById('whatsapp-number').addEventListener('input', function() {
+            this.style.borderColor = 'var(--border)';
+            this.style.boxShadow = 'none';
+            const helper = document.getElementById('whatsapp-helper');
+            helper.style.display = 'none';
+        });
 
-// ── Scroll reveal
-const revealObserver = new IntersectionObserver((entries) => {
-    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); revealObserver.unobserve(e.target); } });
-}, { threshold: 0.08 });
-document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+        // ── Scroll reveal
+        const revealObserver = new IntersectionObserver((entries) => {
+            entries.forEach(e => {
+                if (e.isIntersecting) {
+                    e.target.classList.add('visible');
+                    revealObserver.unobserve(e.target);
+                }
+            });
+        }, {
+            threshold: 0.08
+        });
+        document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
 
-// ── Navbar
-const navbar = document.querySelector('.navbar');
-window.addEventListener('scroll', () => { navbar.classList.toggle('scrolled', window.scrollY > 30); }, { passive: true });
+        // ── Mobile menu
+        const toggle = document.querySelector('.mobile-menu-toggle');
+        const menu = document.querySelector('.nav-menu');
+        const overlay = document.querySelector('.nav-overlay');
+        if (toggle && menu) {
+            function toggleMenu(open) {
+                toggle.classList.toggle('open', open);
+                menu.classList.toggle('active', open);
+                overlay && overlay.classList.toggle('active', open);
+                document.body.style.overflow = open ? 'hidden' : '';
+            }
+            toggle.addEventListener('click', () => toggleMenu(!menu.classList.contains('active')));
+            overlay && overlay.addEventListener('click', () => toggleMenu(false));
+        }
+    </script>
 
-// ── Mobile menu
-const toggle = document.querySelector('.mobile-menu-toggle');
-const menu   = document.querySelector('.nav-menu');
-const overlay = document.querySelector('.nav-overlay');
-if (toggle && menu) {
-    function toggleMenu(open) {
-        toggle.classList.toggle('open', open);
-        menu.classList.toggle('active', open);
-        overlay && overlay.classList.toggle('active', open);
-        document.body.style.overflow = open ? 'hidden' : '';
-    }
-    toggle.addEventListener('click', () => toggleMenu(!menu.classList.contains('active')));
-    overlay && overlay.addEventListener('click', () => toggleMenu(false));
-}
-</script>
-
-<%- include('partials/footer') %>
+    <%- include('partials/footer') %>

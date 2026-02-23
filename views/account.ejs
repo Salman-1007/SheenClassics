@@ -6,8 +6,8 @@
 
                 <!-- Page Header -->
                 <div class="section-header reveal" style="margin-bottom:2.5rem; text-align:left;">
-                    <span class="section-eyebrow">Welcome back</span>
-                    <h1 class="section-title"><em><%= user.name.split(' ')[0] %></em></h1>
+                    <span class="section-eyebrow"><%= user ? 'Welcome back' : 'Guest Account' %></span>
+                    <h1 class="section-title"><em><%= user ? user.name.split(' ')[0] : 'Guest' %></em></h1>
                     <div class="section-divider" style="margin:1.2rem 0 0;"></div>
                 </div>
 
@@ -27,9 +27,11 @@
 
                                 <!-- Tabs -->
                                 <div class="account-tabs reveal">
+                                    <% if (user) { %>
                                     <button class="tab-btn <%= activeTab === 'profile'  ? 'active' : '' %>" onclick="switchTab('profile')">
                     Profile
                 </button>
+                                    <% } %>
                                     <button class="tab-btn <%= activeTab === 'cart'     ? 'active' : '' %>" onclick="switchTab('cart')">
                     Cart
                     <% if (cart.items && cart.items.length > 0) { %>
@@ -42,12 +44,14 @@
                     <span style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;background:var(--gold);color:var(--primary);border-radius:50%;font-size:0.65rem;font-weight:700;margin-left:4px;"><%= wishlist.products.length %></span>
                     <% } %>
                 </button>
+                                    <% if (user) { %>
                                     <button class="tab-btn <%= activeTab === 'orders'  ? 'active' : '' %>" onclick="switchTab('orders')">
                     Orders
                     <% if (orders && orders.length > 0) { %>
                     <span style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;background:var(--gold);color:var(--primary);border-radius:50%;font-size:0.65rem;font-weight:700;margin-left:4px;"><%= orders.length %></span>
                     <% } %>
                 </button>
+                                    <% } %>
                                 </div>
 
                                 <!-- ============================
@@ -413,14 +417,6 @@
             threshold: 0.08
         });
         document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
-
-        // Navbar
-        const navbar = document.querySelector('.navbar');
-        window.addEventListener('scroll', () => {
-            navbar.classList.toggle('scrolled', window.scrollY > 30);
-        }, {
-            passive: true
-        });
 
         // Mobile menu
         const toggle = document.querySelector('.mobile-menu-toggle');

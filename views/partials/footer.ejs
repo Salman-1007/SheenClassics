@@ -172,10 +172,10 @@
     }
 
     // ── Navbar scroll state
-    const navbar = document.getElementById('main-navbar');
-    if (navbar) {
+    const navbarElement = document.getElementById('main-navbar');
+    if (navbarElement) {
         window.addEventListener('scroll', () => {
-            navbar.classList.toggle('scrolled', window.scrollY > 30);
+            navbarElement.classList.toggle('scrolled', window.scrollY > 30);
         }, {
             passive: true
         });

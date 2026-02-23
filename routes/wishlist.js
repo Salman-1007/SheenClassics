@@ -11,8 +11,8 @@ const checkWishlistAccess = (req, res) => {
     res.redirect('/account?tab=wishlist');
 };
 
-// Wishlist page - check if logged in
-router.get('/', checkWishlistAccess);
+// Wishlist page - allow both authenticated and anonymous users
+router.get('/', wishlistController.getWishlist);
 
 // Add to wishlist - ALLOW unauthenticated users (store in session)
 router.post('/add', wishlistController.addToWishlist);
