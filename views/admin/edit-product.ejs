@@ -13,6 +13,15 @@
                         <% } %>
 
                             <form action="/admin/products/<%= product._id %>/edit" method="POST">
+                                <!-- Hidden SEO fields (no visual impact) -->
+                                <input type="hidden" name="metaTitle" value="<%= product.metaTitle || '' %>">
+                                <input type="hidden" name="metaDescription" value="<%= product.metaDescription || '' %>">
+                                <input type="hidden" name="metaKeywords" value="<%= product.metaKeywords || '' %>">
+                                <input type="hidden" name="canonicalUrl" value="<%= product.canonicalUrl || '' %>">
+                                <input type="hidden" name="ogTitle" value="<%= product.ogTitle || '' %>">
+                                <input type="hidden" name="ogDescription" value="<%= product.ogDescription || '' %>">
+                                <input type="hidden" name="ogImage" value="<%= product.ogImage || '' %>">
+
                                 <div class="form-group">
                                     <label>Product Name</label>
                                     <input type="text" name="name" value="<%= product.name %>" required>
@@ -34,10 +43,8 @@
                                 <div class="form-group">
                                     <label>Category</label>
                                     <select name="category" required>
-                            <option value="Men" <%= product.category === 'Men' ? 'selected' : '' %>>Men</option>
-                            <option value="Women" <%= product.category === 'Women' ? 'selected' : '' %>>Women</option>
-                            <option value="Kids" <%= product.category === 'Kids' ? 'selected' : '' %>>Kids</option>
-                            <option value="Accessories" <%= product.category === 'Accessories' ? 'selected' : '' %>>Accessories</option>
+                            <option value="Clothing" <%= product.category === 'Clothing' ? 'selected' : '' %>>Clothing</option>
+                            <option value="HomeDecor" <%= product.category === 'HomeDecor' ? 'selected' : '' %>>Home Decor</option>
                         </select>
                                 </div>
                                 <div class="form-group">
@@ -83,4 +90,3 @@
     </main>
 
     <%- include('../partials/footer') %>
-

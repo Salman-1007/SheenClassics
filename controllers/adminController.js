@@ -74,7 +74,25 @@ exports.getAddProduct = (req, res) => {
 
 exports.postAddProduct = async(req, res) => {
     try {
-        const { name, description, price, originalPrice, category, sizes, colors, stock, featured, shippingFee } = req.body;
+        const {
+            name,
+            description,
+            price,
+            originalPrice,
+            category,
+            sizes,
+            colors,
+            stock,
+            featured,
+            shippingFee,
+            metaTitle,
+            metaDescription,
+            metaKeywords,
+            canonicalUrl,
+            ogTitle,
+            ogDescription,
+            ogImage
+        } = req.body;
 
         // Validate required fields
         if (!name || !description || !price || !category || !stock) {
@@ -136,7 +154,14 @@ exports.postAddProduct = async(req, res) => {
                 stock: parseInt(stock),
                 featured: featured === 'on',
                 images,
-                shippingFee: shippingFee ? parseFloat(shippingFee) : 250
+                shippingFee: shippingFee ? parseFloat(shippingFee) : 250,
+                metaTitle: metaTitle || undefined,
+                metaDescription: metaDescription || undefined,
+                metaKeywords: metaKeywords || undefined,
+                canonicalUrl: canonicalUrl || undefined,
+                ogTitle: ogTitle || undefined,
+                ogDescription: ogDescription || undefined,
+                ogImage: ogImage || undefined
             });
 
             await product.save();
@@ -184,7 +209,25 @@ exports.getEditProduct = async(req, res) => {
 
 exports.postEditProduct = async(req, res) => {
     try {
-        const { name, description, price, originalPrice, category, sizes, colors, stock, featured, shippingFee } = req.body;
+        const {
+            name,
+            description,
+            price,
+            originalPrice,
+            category,
+            sizes,
+            colors,
+            stock,
+            featured,
+            shippingFee,
+            metaTitle,
+            metaDescription,
+            metaKeywords,
+            canonicalUrl,
+            ogTitle,
+            ogDescription,
+            ogImage
+        } = req.body;
 
         await Product.findByIdAndUpdate(req.params.id, {
             name,
@@ -196,7 +239,14 @@ exports.postEditProduct = async(req, res) => {
             colors: colors ? (Array.isArray(colors) ? colors : [colors]) : [],
             stock: parseInt(stock),
             featured: featured === 'on',
-            shippingFee: shippingFee ? parseFloat(shippingFee) : undefined
+            shippingFee: shippingFee ? parseFloat(shippingFee) : undefined,
+            metaTitle: metaTitle || undefined,
+            metaDescription: metaDescription || undefined,
+            metaKeywords: metaKeywords || undefined,
+            canonicalUrl: canonicalUrl || undefined,
+            ogTitle: ogTitle || undefined,
+            ogDescription: ogDescription || undefined,
+            ogImage: ogImage || undefined
         });
 
         res.redirect('/admin/products?success=Product updated successfully');

@@ -55,11 +55,6 @@
                                             <span class="product-badge">Featured</span>
                                             <% } %>
 
-                                                <div class="product-overlay">
-                                                    <button class="product-quick-add" onclick="event.stopPropagation(); addToCart('<%= product._id %>')">
-                                Quick Add to Cart
-                            </button>
-                                                </div>
                                 </div>
 
                                 <div class="product-info">
@@ -81,10 +76,10 @@
                                     </div>
 
                                     <div class="product-actions">
-                                        <button class="btn btn-add-cart" onclick="event.stopPropagation(); addToCart('<%= product._id %>')">
+                                        <button class="btn btn-add-cart" data-product-id="<%= product._id %>">
                                 <span>Add to Cart</span>
                             </button>
-                                        <button class="btn btn-wishlist" onclick="event.stopPropagation(); addToWishlist('<%= product._id %>')" title="Add to Wishlist">♡</button>
+                                        <button class="btn btn-wishlist" data-product-id="<%= product._id %>" title="Add to Wishlist">♡</button>
                                     </div>
                                 </div>
                             </div>
@@ -154,11 +149,6 @@
                                             <img src="<%= product.images && product.images[0] ? product.images[0] : '/images/p1.jpeg' %>" alt="<%= product.name %>" class="product-image" loading="lazy">
                                             <span class="product-badge">New</span>
 
-                                            <div class="product-overlay">
-                                                <button class="product-quick-add" onclick="event.stopPropagation(); addToCart('<%= product._id %>')">
-                                Quick Add to Cart
-                            </button>
-                                            </div>
                                         </div>
 
                                         <div class="product-info">
@@ -180,10 +170,10 @@
                                             </div>
 
                                             <div class="product-actions">
-                                                <button class="btn btn-add-cart" onclick="event.stopPropagation(); addToCart('<%= product._id %>')">
+                                                <button class="btn btn-add-cart" data-product-id="<%= product._id %>">
                                 <span>Add to Cart</span>
                             </button>
-                                                <button class="btn btn-wishlist" onclick="event.stopPropagation(); addToWishlist('<%= product._id %>')" title="Add to Wishlist">♡</button>
+                                                <button class="btn btn-wishlist" data-product-id="<%= product._id %>" title="Add to Wishlist">♡</button>
                                             </div>
                                         </div>
                                     </div>
@@ -258,5 +248,30 @@
             overlay && overlay.addEventListener('click', () => toggleMenu(false));
         }
     </script>
+
+    <!-- Chatbot Side Panel -->
+    <div id="chatbot-widget" class="chatbot-widget">
+        <div class="chatbot-toggle" id="chatbot-toggle">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            </svg>
+        </div>
+        <div class="chatbot-panel" id="chatbot-panel">
+            <div class="chatbot-header">
+                <div>
+                    <h3>SheenClassics Assistant</h3>
+                    <p>Ask about products, orders, coupons, shipping, or cart help.</p>
+                </div>
+                <button class="chatbot-close" id="chatbot-close">&times;</button>
+            </div>
+            <div id="chat-history" class="chatbot-history" aria-live="polite" aria-atomic="false"></div>
+            <form id="chat-form" class="chatbot-form">
+                <input id="chat-input" type="text" placeholder="Type a question..." autocomplete="off" required>
+                <button type="submit" class="btn btn-primary">Send</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="/js/chatbot.js"></script>
 
     <%- include('partials/footer') %>

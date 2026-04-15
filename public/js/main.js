@@ -250,9 +250,54 @@ function showNotification(message, type = 'info') {
     }, 3000);
 }
 
+// Event delegation for add to cart and wishlist buttons
+document.addEventListener('click', function(event) {
+    const target = event.target.closest('[data-action], .btn-add-cart, .product-quick-add, .btn-wishlist');
+    if (!target) return;
+
+    // Skip if this is a form submit button (like login/signup)
+    if (target.type === 'submit' && target.closest('form')) {
+        return;
+    }
+
+    // Skip if this button doesn't have product-related attributes
+    const action = target.getAttribute('data-action');
+    const productId = target.getAttribute('data-product-id');
+
+    // Only prevent default if we have product-related attributes or actions
+    if (!productId && !action && !target.classList.contains('btn-wishlist')) {
+        return;
+    }
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    // Handle data-action attributes (new way)
+    if (action === 'add-to-cart') {
+        const size = document.getElementById('product-size') ?.value || '';
+        const color = document.getElementById('product-color') ?.value || '';
+        addToCart(productId, size, color);
+    } else if (action === 'add-to-wishlist') {
+        addToWishlist(productId);
+    } else if (action === 'remove-from-wishlist') {
+        removeFromWishlist(productId);
+    } else if (action === 'remove-from-cart') {
+        removeFromCart(productId);
+    } else if (action === 'update-quantity') {
+        const quantity = parseInt(target.getAttribute('data-quantity'));
+        updateCartQuantity(productId, quantity);
+    }
+    // Handle legacy classes (for backward compatibility)
+    else if (target.classList.contains('btn-wishlist') && productId) {
+        addToWishlist(productId);
+    } else if ((target.classList.contains('btn-add-cart') || target.classList.contains('product-quick-add')) && productId) {
+        addToCart(productId);
+    }
+});
+
 // Add CSS for notification animation
-const style = document.createElement('style');
-style.textContent = `
+const notificationStyle = document.createElement('style');
+notificationStyle.textContent = `
     @keyframes slideIn {
         from {
             transform: translateX(400px);
@@ -275,4 +320,4 @@ style.textContent = `
         }
     }
 `;
-document.head.appendChild(style);
+document.head.appendChild(notificationStyle);

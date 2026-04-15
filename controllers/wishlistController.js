@@ -23,6 +23,11 @@ exports.addToWishlist = async(req, res) => {
     try {
         const { productId } = req.body;
 
+        const product = await Product.findById(productId);
+        if (!product) {
+            return res.json({ success: false, message: 'Product not found' });
+        }
+
         // Find wishlist by user or sessionId
         let wishlist;
         if (req.session.userId) {
@@ -39,7 +44,8 @@ exports.addToWishlist = async(req, res) => {
             });
         }
 
-        if (wishlist.products.includes(productId)) {
+        const alreadyAdded = wishlist.products.some(id => id.toString() === productId);
+        if (alreadyAdded) {
             return res.json({ success: false, message: 'Product already in wishlist' });
         }
 
@@ -60,7 +66,7 @@ exports.addToWishlist = async(req, res) => {
 
 exports.removeFromWishlist = async(req, res) => {
     try {
-        const { productId } = req.body;
+        const productId = req.body.productId || req.query.productId;
 
         // Find wishlist by user or sessionId
         let wishlist;

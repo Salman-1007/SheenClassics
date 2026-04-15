@@ -94,43 +94,42 @@
         </section>
     </main>
 
-    <script>
-        // Scroll reveal
-        const revealObserver = new IntersectionObserver((entries) => {
-            entries.forEach(e => {
-                if (e.isIntersecting) {
-                    e.target.classList.add('visible');
-                    revealObserver.unobserve(e.target);
-                }
-            });
-        }, {
-            threshold: 0.08
-        });
-        document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
-
-        // Navbar
-        const navbar = document.querySelector('.navbar');
-        window.addEventListener('scroll', () => {
-            navbar.classList.toggle('scrolled', window.scrollY > 30);
-        }, {
-            passive: true
-        });
-
-        // Mobile menu
-        const toggle = document.querySelector('.mobile-menu-toggle');
-        const menu = document.querySelector('.nav-menu');
-        const overlay = document.querySelector('.nav-overlay');
-        if (toggle && menu) {
-            function toggleMenu(open) {
-                toggle.classList.toggle('open', open);
-                menu.classList.toggle('active', open);
-                overlay && overlay.classList.toggle('active', open);
-                document.body.style.overflow = open ? 'hidden' : '';
-            }
-            toggle.addEventListener('click', () => toggleMenu(!menu.classList.contains('active')));
-            overlay && overlay.addEventListener('click', () => toggleMenu(false));
-        }
-    </script>
-
     <%- include('partials/footer') %>
 
+        <script>
+            // Scroll reveal
+            const revealObserver = new IntersectionObserver((entries) => {
+                entries.forEach(e => {
+                    if (e.isIntersecting) {
+                        e.target.classList.add('visible');
+                        revealObserver.unobserve(e.target);
+                    }
+                });
+            }, {
+                threshold: 0.08
+            });
+            document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+
+            // Navbar
+            const navbar = document.querySelector('.navbar');
+            window.addEventListener('scroll', () => {
+                navbar.classList.toggle('scrolled', window.scrollY > 30);
+            }, {
+                passive: true
+            });
+
+            // Mobile menu
+            const toggle = document.querySelector('.mobile-menu-toggle');
+            const menu = document.querySelector('.nav-menu');
+            const overlay = document.querySelector('.nav-overlay');
+            if (toggle && menu) {
+                function toggleMenu(open) {
+                    toggle.classList.toggle('open', open);
+                    menu.classList.toggle('active', open);
+                    overlay && overlay.classList.toggle('active', open);
+                    document.body.style.overflow = open ? 'hidden' : '';
+                }
+                toggle.addEventListener('click', () => toggleMenu(!menu.classList.contains('active')));
+                overlay && overlay.addEventListener('click', () => toggleMenu(false));
+            }
+        </script>

@@ -1,0 +1,25 @@
+<%- include('partials/header') %>
+
+    <section class="section section-chatbot">
+        <div class="container">
+            <div class="chatbot-card">
+                <div class="chatbot-header">
+                    <div>
+                        <h1>SheenClassics Assistant</h1>
+                        <p>Ask about products, orders, coupons, shipping, or cart help.</p>
+                    </div>
+                </div>
+
+                <div id="chat-history" class="chatbot-history" aria-live="polite" aria-atomic="false"></div>
+
+                <form id="chat-form" class="chatbot-form">
+                    <input id="chat-input" type="text" placeholder="Type a question, such as \" Show me shirts under 1500\ "" autocomplete="off" required>
+                    <button type="submit" class="btn btn-primary">Send</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <script src="/js/chatbot.js"></script>
+
+    <%- include('partials/footer') %>

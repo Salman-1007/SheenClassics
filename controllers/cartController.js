@@ -60,7 +60,7 @@ exports.addToCart = async(req, res) => {
         } else {
             // Check total quantity including existing items
             const existingItem = cart.items.find(item =>
-                item.product._id.toString() === productId &&
+                item.product && item.product._id.toString() === productId &&
                 item.size === size &&
                 item.color === color
             );
@@ -77,7 +77,7 @@ exports.addToCart = async(req, res) => {
         }
 
         const existingItem = cart.items.find(item =>
-            item.product.toString() === productId &&
+            item.product && (item.product._id ?.toString() === productId || item.product.toString() === productId) &&
             item.size === size &&
             item.color === color
         );
@@ -132,7 +132,7 @@ exports.updateCartItem = async(req, res) => {
             }
 
             // Check stock availability
-            const product = await Product.findById(item.product._id || item.product);
+            const product = await Product.findById(item.product ?._id || item.product);
             if (!product) {
                 return res.json({ success: false, message: 'Product not found' });
             }
@@ -164,7 +164,7 @@ exports.updateCartItem = async(req, res) => {
 
 exports.removeFromCart = async(req, res) => {
     try {
-        const { itemId } = req.body;
+        const itemId = req.body.itemId || req.query.itemId;
 
         // Find cart by user or sessionId
         let cart;

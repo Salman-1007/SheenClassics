@@ -113,10 +113,10 @@
 
                                         <!-- CTA Buttons -->
                                         <div style="display:flex;gap:0.75rem;margin-bottom:2rem;">
-                                            <button class="btn btn-add-cart" style="flex:1;padding:1rem 1.5rem;font-size:0.88rem;border-radius:var(--radius-sm);" onclick="addToCart('<%= product._id %>', document.getElementById('product-size')?.value || '', document.getElementById('product-color')?.value || '')">
+                                            <button class="btn btn-add-cart" style="flex:1;padding:1rem 1.5rem;font-size:0.88rem;border-radius:var(--radius-sm);" data-product-id="<%= product._id %>" data-action="add-to-cart">
                             <span>Add to Cart</span>
                         </button>
-                                            <button class="btn btn-wishlist" style="width:52px;height:52px;font-size:1.3rem;border-radius:var(--radius-sm);" onclick="addToWishlist('<%= product._id %>')" title="Add to Wishlist">♡</button>
+                                            <button class="btn btn-wishlist" style="width:52px;height:52px;font-size:1.3rem;border-radius:var(--radius-sm);" data-product-id="<%= product._id %>" data-action="add-to-wishlist" title="Add to Wishlist">♡</button>
                                         </div>
 
                                         <!-- Stock / Meta -->
@@ -163,7 +163,7 @@
                                     <div class="product-image-wrap">
                                         <img src="<%= rp.images && rp.images[0] ? rp.images[0] : '/images/p1.jpeg' %>" alt="<%= rp.name %>" class="product-image" loading="lazy">
                                         <div class="product-overlay">
-                                            <button class="product-quick-add" onclick="event.stopPropagation(); addToCart('<%= rp._id %>')">Quick Add</button>
+                                            <button class="product-quick-add" onclick="if (event) event.stopPropagation(); addToCart('<%= rp._id %>')">Quick Add</button>
                                         </div>
                                     </div>
                                     <div class="product-info">
@@ -181,8 +181,8 @@
                                                     <% } %>
                                         </div>
                                         <div class="product-actions">
-                                            <button class="btn btn-add-cart" onclick="event.stopPropagation(); addToCart('<%= rp._id %>')"><span>Add to Cart</span></button>
-                                            <button class="btn btn-wishlist" onclick="event.stopPropagation(); addToWishlist('<%= rp._id %>')">♡</button>
+                                            <button class="btn btn-add-cart" onclick="if (event) event.stopPropagation(); addToCart('<%= rp._id %>')"><span>Add to Cart</span></button>
+                                            <button class="btn btn-wishlist" onclick="if (event) event.stopPropagation(); addToWishlist('<%= rp._id %>')">♡</button>
                                         </div>
                                     </div>
                                 </div>
@@ -194,143 +194,6 @@
             </div>
         </section>
     </main>
-
-    <script>
-        // ── Size & Color selectors
-        function selectSize(btn, size) {
-            document.querySelectorAll('#size-options button').forEach(b => {
-                b.style.background = '#fff';
-                b.style.color = 'var(--text-primary)';
-                b.style.border = '1.5px solid var(--border)';
-            });
-            btn.style.background = 'var(--primary)';
-            btn.style.color = '#fff';
-            btn.style.border = '2px solid var(--primary)';
-            document.getElementById('product-size').value = size;
-        }
-
-        function selectColor(btn, color) {
-            document.querySelectorAll('#color-options button').forEach(b => {
-                b.style.background = '#fff';
-                b.style.color = 'var(--text-primary)';
-                b.style.border = '1.5px solid var(--border)';
-            });
-            btn.style.background = 'var(--primary)';
-            btn.style.color = '#fff';
-            btn.style.border = '2px solid var(--primary)';
-            document.getElementById('product-color').value = color;
-        }
-
-        // ── Image gallery
-        (function() {
-            const images = [
-                <% if (product.images && product.images.length) { %>
-                <% product.images.forEach(function(img, idx) { %>
-                '<%= img %>'
-                <% if (idx < product.images.length - 1) { %>, <% } %>
-                <% }); %>
-                <% } else { %>
-                '/images/p1.jpeg'
-                <% } %>
-            ];
-
-            const galleryImage = document.getElementById('gallery-image');
-            const prevBtn = document.querySelector('.gallery-btn.prev');
-            const nextBtn = document.querySelector('.gallery-btn.next');
-            const thumbBtns = Array.from(document.querySelectorAll('.thumb-btn'));
-            const counter = document.getElementById('img-counter');
-            let current = 0;
-
-            function showImage(index) {
-                if (!images.length) return;
-                current = (index + images.length) % images.length;
-                galleryImage.style.opacity = '0';
-                setTimeout(() => {
-                    galleryImage.src = images[current];
-                    galleryImage.style.opacity = '1';
-                }, 180);
-                thumbBtns.forEach(btn => {
-                    const img = btn.querySelector('img');
-                    const active = parseInt(btn.dataset.index) === current;
-                    btn.style.borderColor = active ? 'var(--gold)' : 'transparent';
-                });
-                if (counter) counter.textContent = `${current + 1} / ${images.length}`;
-            }
-
-            if (nextBtn) nextBtn.addEventListener('click', () => showImage(current + 1));
-            if (prevBtn) prevBtn.addEventListener('click', () => showImage(current - 1));
-
-            thumbBtns.forEach(btn => btn.addEventListener('click', () => showImage(parseInt(btn.dataset.index))));
-
-            document.addEventListener('keydown', e => {
-                if (e.key === 'ArrowLeft') showImage(current - 1);
-                if (e.key === 'ArrowRight') showImage(current + 1);
-            });
-
-            let touchStartX = 0;
-            const galleryMain = document.querySelector('.gallery-main');
-            if (galleryMain) {
-                galleryMain.addEventListener('touchstart', e => {
-                    touchStartX = e.changedTouches[0].screenX;
-                }, {
-                    passive: true
-                });
-                galleryMain.addEventListener('touchend', e => {
-                    const dx = e.changedTouches[0].screenX - touchStartX;
-                    if (Math.abs(dx) > 40) dx < 0 ? showImage(current + 1) : showImage(current - 1);
-                });
-            }
-
-            // Gallery nav arrow hover
-            [prevBtn, nextBtn].forEach(btn => {
-                if (!btn) return;
-                btn.addEventListener('mouseenter', () => {
-                    btn.style.background = 'var(--gold)';
-                });
-                btn.addEventListener('mouseleave', () => {
-                    btn.style.background = 'rgba(255,255,255,0.92)';
-                });
-            });
-
-            showImage(0);
-        })();
-
-        // ── Scroll reveal
-        const revealObserver = new IntersectionObserver((entries) => {
-            entries.forEach(e => {
-                if (e.isIntersecting) {
-                    e.target.classList.add('visible');
-                    revealObserver.unobserve(e.target);
-                }
-            });
-        }, {
-            threshold: 0.08
-        });
-        document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
-
-        // ── Navbar
-        const navbar = document.querySelector('.navbar');
-        window.addEventListener('scroll', () => {
-            navbar.classList.toggle('scrolled', window.scrollY > 30);
-        }, {
-            passive: true
-        });
-
-        // ── Mobile menu
-        const toggle = document.querySelector('.mobile-menu-toggle');
-        const menu = document.querySelector('.nav-menu');
-        const overlay = document.querySelector('.nav-overlay');
-        if (toggle && menu) {
-            function toggleMenu(open) {
-                toggle.classList.toggle('open', open);
-                menu.classList.toggle('active', open);
-                overlay && overlay.classList.toggle('active', open);
-                document.body.style.overflow = open ? 'hidden' : '';
-            }
-            toggle.addEventListener('click', () => toggleMenu(!menu.classList.contains('active')));
-            overlay && overlay.addEventListener('click', () => toggleMenu(false));
-        }
-    </script>
 
     <!-- Responsive product layout -->
     <style>
@@ -344,3 +207,139 @@
 
     <%- include('partials/footer') %>
 
+        <script>
+            // ── Size & Color selectors
+            function selectSize(btn, size) {
+                document.querySelectorAll('#size-options button').forEach(b => {
+                    b.style.background = '#fff';
+                    b.style.color = 'var(--text-primary)';
+                    b.style.border = '1.5px solid var(--border)';
+                });
+                btn.style.background = 'var(--primary)';
+                btn.style.color = '#fff';
+                btn.style.border = '2px solid var(--primary)';
+                document.getElementById('product-size').value = size;
+            }
+
+            function selectColor(btn, color) {
+                document.querySelectorAll('#color-options button').forEach(b => {
+                    b.style.background = '#fff';
+                    b.style.color = 'var(--text-primary)';
+                    b.style.border = '1.5px solid var(--border)';
+                });
+                btn.style.background = 'var(--primary)';
+                btn.style.color = '#fff';
+                btn.style.border = '2px solid var(--primary)';
+                document.getElementById('product-color').value = color;
+            }
+
+            // ── Image gallery
+            (function() {
+                const images = [
+                    <% if (product.images && product.images.length) { %>
+                    <% product.images.forEach(function(img, idx) { %>
+                    '<%= img %>'
+                    <% if (idx < product.images.length - 1) { %>, <% } %>
+                    <% }); %>
+                    <% } else { %>
+                    '/images/p1.jpeg'
+                    <% } %>
+                ];
+
+                const galleryImage = document.getElementById('gallery-image');
+                const prevBtn = document.querySelector('.gallery-btn.prev');
+                const nextBtn = document.querySelector('.gallery-btn.next');
+                const thumbBtns = Array.from(document.querySelectorAll('.thumb-btn'));
+                const counter = document.getElementById('img-counter');
+                let current = 0;
+
+                function showImage(index) {
+                    if (!images.length) return;
+                    current = (index + images.length) % images.length;
+                    galleryImage.style.opacity = '0';
+                    setTimeout(() => {
+                        galleryImage.src = images[current];
+                        galleryImage.style.opacity = '1';
+                    }, 180);
+                    thumbBtns.forEach(btn => {
+                        const img = btn.querySelector('img');
+                        const active = parseInt(btn.dataset.index) === current;
+                        btn.style.borderColor = active ? 'var(--gold)' : 'transparent';
+                    });
+                    if (counter) counter.textContent = `${current + 1} / ${images.length}`;
+                }
+
+                if (nextBtn) nextBtn.addEventListener('click', () => showImage(current + 1));
+                if (prevBtn) prevBtn.addEventListener('click', () => showImage(current - 1));
+
+                thumbBtns.forEach(btn => btn.addEventListener('click', () => showImage(parseInt(btn.dataset.index))));
+
+                document.addEventListener('keydown', e => {
+                    if (e.key === 'ArrowLeft') showImage(current - 1);
+                    if (e.key === 'ArrowRight') showImage(current + 1);
+                });
+
+                let touchStartX = 0;
+                const galleryMain = document.querySelector('.gallery-main');
+                if (galleryMain) {
+                    galleryMain.addEventListener('touchstart', e => {
+                        touchStartX = e.changedTouches[0].screenX;
+                    }, {
+                        passive: true
+                    });
+                    galleryMain.addEventListener('touchend', e => {
+                        const dx = e.changedTouches[0].screenX - touchStartX;
+                        if (Math.abs(dx) > 40) dx < 0 ? showImage(current + 1) : showImage(current - 1);
+                    });
+                }
+
+                // Gallery nav arrow hover
+                [prevBtn, nextBtn].forEach(btn => {
+                    if (!btn) return;
+                    btn.addEventListener('mouseenter', () => {
+                        btn.style.background = 'var(--gold)';
+                    });
+                    btn.addEventListener('mouseleave', () => {
+                        btn.style.background = 'rgba(255,255,255,0.92)';
+                    });
+                });
+
+                showImage(0);
+            })();
+
+            // ── Scroll reveal
+            const revealObserver = new IntersectionObserver((entries) => {
+                entries.forEach(e => {
+                    if (e.isIntersecting) {
+                        e.target.classList.add('visible');
+                        revealObserver.unobserve(e.target);
+                    }
+                });
+            }, {
+                threshold: 0.08
+            });
+            document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+
+            // ── Navbar
+            const navbar = document.querySelector('.navbar');
+            window.addEventListener('scroll', () => {
+                navbar.classList.toggle('scrolled', window.scrollY > 30);
+            }, {
+                passive: true
+            });
+
+            // ── Mobile menu
+            const toggle = document.querySelector('.mobile-menu-toggle');
+            const menu = document.querySelector('.nav-menu');
+            const overlay = document.querySelector('.nav-overlay');
+            if (toggle && menu) {
+                function toggleMenu(open) {
+                    toggle.classList.toggle('open', open);
+                    menu.classList.toggle('active', open);
+                    overlay && overlay.classList.toggle('active', open);
+                    document.body.style.overflow = open ? 'hidden' : '';
+                }
+                toggle.addEventListener('click', () => toggleMenu(!menu.classList.contains('active')));
+                overlay && overlay.addEventListener('click', () => toggleMenu(false));
+            }
+        </script>

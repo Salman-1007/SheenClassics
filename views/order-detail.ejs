@@ -21,11 +21,11 @@
                         <%= order.status %>
                     </span>
                         <% if (typeof session !== 'undefined' && session.userId) { %>
-                        <a href="/account?tab=orders" style="display:inline-flex;align-items:center;gap:5px;padding:0.6rem 1.2rem;background:transparent;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:0.78rem;font-weight:600;color:var(--text-secondary);text-decoration:none;transition:all 0.25s;"
-                            onmouseover="this.style.borderColor='var(--primary)';this.style.color='var(--primary)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-secondary)'">
-                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg> All Orders
-                        </a>
-                        <% } %>
+                            <a href="/account?tab=orders" style="display:inline-flex;align-items:center;gap:5px;padding:0.6rem 1.2rem;background:transparent;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:0.78rem;font-weight:600;color:var(--text-secondary);text-decoration:none;transition:all 0.25s;"
+                                onmouseover="this.style.borderColor='var(--primary)';this.style.color='var(--primary)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-secondary)'">
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg> All Orders
+                            </a>
+                            <% } %>
                     </div>
                 </div>
 
@@ -191,64 +191,63 @@
         }
     </style>
 
-    <script>
-        async function cancelOrder(orderId) {
-            if (!confirm('Are you sure you want to cancel this order?')) return;
-            try {
-                const response = await fetch(`/orders/${orderId}/cancel`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                });
-                const data = await response.json();
-                if (data.success) {
-                    showNotification(data.message, 'success');
-                    setTimeout(() => location.reload(), 1200);
-                } else {
-                    showNotification(data.message, 'error');
-                }
-            } catch (error) {
-                showNotification('Failed to cancel order', 'error');
-            }
-        }
-
-        // Scroll reveal
-        const revealObserver = new IntersectionObserver((entries) => {
-            entries.forEach(e => {
-                if (e.isIntersecting) {
-                    e.target.classList.add('visible');
-                    revealObserver.unobserve(e.target);
-                }
-            });
-        }, {
-            threshold: 0.08
-        });
-        document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
-
-        // Navbar
-        const navbar = document.querySelector('.navbar');
-        window.addEventListener('scroll', () => {
-            navbar.classList.toggle('scrolled', window.scrollY > 30);
-        }, {
-            passive: true
-        });
-
-        // Mobile menu
-        const toggle = document.querySelector('.mobile-menu-toggle');
-        const menu = document.querySelector('.nav-menu');
-        const overlay = document.querySelector('.nav-overlay');
-        if (toggle && menu) {
-            function toggleMenu(open) {
-                toggle.classList.toggle('open', open);
-                menu.classList.toggle('active', open);
-                overlay && overlay.classList.toggle('active', open);
-                document.body.style.overflow = open ? 'hidden' : '';
-            }
-            toggle.addEventListener('click', () => toggleMenu(!menu.classList.contains('active')));
-            overlay && overlay.addEventListener('click', () => toggleMenu(false));
-        }
-    </script>
-
     <%- include('partials/footer') %>
 
+        <script>
+            async function cancelOrder(orderId) {
+                if (!confirm('Are you sure you want to cancel this order?')) return;
+                try {
+                    const response = await fetch(`/orders/${orderId}/cancel`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    const data = await response.json();
+                    if (data.success) {
+                        showNotification(data.message, 'success');
+                        setTimeout(() => location.reload(), 1200);
+                    } else {
+                        showNotification(data.message, 'error');
+                    }
+                } catch (error) {
+                    showNotification('Failed to cancel order', 'error');
+                }
+            }
+
+            // Scroll reveal
+            const revealObserver = new IntersectionObserver((entries) => {
+                entries.forEach(e => {
+                    if (e.isIntersecting) {
+                        e.target.classList.add('visible');
+                        revealObserver.unobserve(e.target);
+                    }
+                });
+            }, {
+                threshold: 0.08
+            });
+            document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+
+            // Navbar
+            const navbar = document.querySelector('.navbar');
+            window.addEventListener('scroll', () => {
+                navbar.classList.toggle('scrolled', window.scrollY > 30);
+            }, {
+                passive: true
+            });
+
+            // Mobile menu
+            const toggle = document.querySelector('.mobile-menu-toggle');
+            const menu = document.querySelector('.nav-menu');
+            const overlay = document.querySelector('.nav-overlay');
+            if (toggle && menu) {
+                function toggleMenu(open) {
+                    toggle.classList.toggle('open', open);
+                    menu.classList.toggle('active', open);
+                    overlay && overlay.classList.toggle('active', open);
+                    document.body.style.overflow = open ? 'hidden' : '';
+                }
+                toggle.addEventListener('click', () => toggleMenu(!menu.classList.contains('active')));
+                overlay && overlay.addEventListener('click', () => toggleMenu(false));
+            }
+        </script>

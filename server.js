@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const session = require('express-session');
 const MongoStore = require('connect-mongo');
 const path = require('path');
+const helmet = require('helmet');
 require('dotenv').config();
 
 const app = express();
@@ -30,9 +31,47 @@ app.use(session({
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
+app.use(helmet({
+    contentSecurityPolicy: {
+        directives: {
+            defaultSrc: ["'self'"],
+            scriptSrc: ["'self'", "'unsafe-inline'"],
+            scriptSrcAttr: ["'unsafe-inline'"],
+            styleSrc: ["'self'", "'unsafe-inline'", 'https:'],
+            imgSrc: ["'self'", 'data:', 'https:'],
+            connectSrc: ["'self'"],
+            fontSrc: ["'self'", 'https:', 'data:'],
+            objectSrc: ["'none'"],
+            frameAncestors: ["'self'"],
+            baseUri: ["'self'"],
+            formAction: ["'self'"]
+        }
+    }
+}));
+
 // Make session available to all views
 app.use((req, res, next) => {
     res.locals.session = req.session;
+    next();
+});
+
+// SEO defaults for all pages
+app.use((req, res, next) => {
+    const siteName = 'SheenClassics';
+    const defaultDescription = 'Discover premium embroidered fashion for men, women and kids from SheenClassics.';
+    const baseUrl = `${req.protocol}://${req.get('host')}`;
+
+    res.locals.metaTitle = `${siteName} — Premium Embroidered Clothing`;
+    res.locals.metaDescription = defaultDescription;
+    res.locals.metaKeywords = 'SheenClassics, embroidered, fashion, clothing';
+    res.locals.metaRobots = 'index, follow';
+
+    res.locals.canonicalUrl = `${baseUrl}${req.path}`;
+    res.locals.ogTitle = `${siteName} — Premium Embroidered Clothing`;
+    res.locals.ogDescription = defaultDescription;
+    res.locals.ogImage = '/images/logoc.jpg';
+    res.locals.twitterCard = 'summary_large_image';
+
     next();
 });
 
@@ -56,6 +95,7 @@ app.use('/products', require('./routes/products'));
 app.use('/cart', require('./routes/cart'));
 app.use('/wishlist', require('./routes/wishlist'));
 app.use('/orders', require('./routes/orders'));
+app.use('/chatbot', require('./routes/chat'));
 app.use('/account', require('./routes/account'));
 app.use('/admin', require('./routes/admin'));
 

@@ -174,7 +174,7 @@
                                                                         <div class="cart-item-details">
                                                                             <h3 class="cart-item-name" style="color:#c0392b;">Product No Longer Available</h3>
                                                                             <p style="font-size:0.82rem;color:var(--text-muted);margin-bottom:1rem;">This item has been removed from our catalog.</p>
-                                                                            <button onclick="removeFromCart('<%= item._id %>')" style="background:none;border:1px solid rgba(231,76,60,0.4);color:#c0392b;padding:0.5rem 1rem;border-radius:var(--radius-sm);font-size:0.78rem;font-weight:600;cursor:pointer;font-family:var(--font-body);transition:all 0.2s;"
+                                                                            <button data-product-id="<%= item._id %>" data-action="remove-from-cart" style="background:none;border:1px solid rgba(231,76,60,0.4);color:#c0392b;padding:0.5rem 1rem;border-radius:var(--radius-sm);font-size:0.78rem;font-weight:600;cursor:pointer;font-family:var(--font-body);transition:all 0.2s;"
                                                                                 onmouseover="this.style.background='rgba(231,76,60,0.08)'" onmouseout="this.style.background='none'">
                                     Remove from Cart
                                 </button>
@@ -209,11 +209,11 @@
 
                                                                                 <div style="display:flex;align-items:center;justify-content:space-between;margin-top:1.2rem;flex-wrap:wrap;gap:1rem;">
                                                                                     <div class="quantity-control">
-                                                                                        <button class="quantity-btn" onclick="updateCartQuantity('<%= item._id %>', <%= item.quantity - 1 %>)">−</button>
+                                                                                        <button class="quantity-btn" data-product-id="<%= item._id %>" data-action="update-quantity" data-quantity="<%= item.quantity - 1 %>">−</button>
                                                                                         <span class="quantity-value"><%= item.quantity %></span>
-                                                                                        <button class="quantity-btn" onclick="updateCartQuantity('<%= item._id %>', <%= item.quantity + 1 %>)">+</button>
+                                                                                        <button class="quantity-btn" data-product-id="<%= item._id %>" data-action="update-quantity" data-quantity="<%= item.quantity + 1 %>">+</button>
                                                                                     </div>
-                                                                                    <button onclick="removeFromCart('<%= item._id %>')" style="background:none;border:none;cursor:pointer;font-size:0.78rem;font-weight:500;color:var(--text-muted);letter-spacing:0.05em;display:flex;align-items:center;gap:4px;transition:color 0.2s;font-family:var(--font-body);"
+                                                                                    <button data-product-id="<%= item._id %>" data-action="remove-from-cart" style="background:none;border:none;cursor:pointer;font-size:0.78rem;font-weight:500;color:var(--text-muted);letter-spacing:0.05em;display:flex;align-items:center;gap:4px;transition:color 0.2s;font-family:var(--font-body);"
                                                                                         onmouseover="this.style.color='#e74c3c'" onmouseout="this.style.color='var(--text-muted)'">
                                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg>
                                         Remove
@@ -267,7 +267,7 @@
                                                             <div class="product-image-wrap">
                                                                 <img src="<%= product.images && product.images[0] ? product.images[0] : '/images/p1.jpeg' %>" alt="<%= product.name %>" class="product-image" loading="lazy">
                                                                 <div class="product-overlay">
-                                                                    <button class="product-quick-add" onclick="event.stopPropagation(); addToCart('<%= product._id %>')">Quick Add</button>
+                                                                    <button class="product-quick-add" onclick="if (event) event.stopPropagation(); addToCart('<%= product._id %>')">Quick Add</button>
                                                                 </div>
                                                             </div>
                                                             <div class="product-info">
@@ -282,10 +282,10 @@
                                                                             <% } %>
                                                                 </div>
                                                                 <div class="product-actions">
-                                                                    <button class="btn btn-add-cart" onclick="event.stopPropagation(); addToCart('<%= product._id %>')">
+                                                                    <button class="btn btn-add-cart" onclick="if (event) event.stopPropagation(); addToCart('<%= product._id %>')">
                                     <span>Add to Cart</span>
                                 </button>
-                                                                    <button class="btn btn-wishlist active" onclick="event.stopPropagation(); removeFromWishlist('<%= product._id %>')" title="Remove from wishlist">♥</button>
+                                                                    <button class="btn btn-wishlist active" data-product-id="<%= product._id %>" data-action="remove-from-wishlist" title="Remove from wishlist">♥</button>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -334,21 +334,38 @@
                                                                 <!-- Order Items Preview -->
                                                                 <div style="padding:1.2rem 1.8rem;">
                                                                     <% order.items.forEach(item => { %>
-                                                                        <div style="display:flex;gap:1rem;align-items:center;padding:0.8rem 0;border-bottom:1px solid var(--border);">
-                                                                            <img src="<%= item.product.images && item.product.images[0] ? item.product.images[0] : '/images/p1.jpeg' %>" alt="<%= item.product.name %>" style="width:60px;height:75px;object-fit:cover;border-radius:var(--radius-sm);flex-shrink:0;">
-                                                                            <div style="flex:1;min-width:0;">
-                                                                                <h4 style="font-family:var(--font-serif);font-size:1rem;font-weight:400;color:var(--primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
-                                                                                    <%= item.product.name %>
-                                                                                </h4>
-                                                                                <p style="font-size:0.78rem;color:var(--text-muted);margin-top:0.2rem;">Qty:
-                                                                                    <%= item.quantity %>
-                                                                                </p>
+                                                                        <% if (item.product) { %>
+                                                                            <div style="display:flex;gap:1rem;align-items:center;padding:0.8rem 0;border-bottom:1px solid var(--border);">
+                                                                                <img src="<%= item.product.images && item.product.images[0] ? item.product.images[0] : '/images/p1.jpeg' %>" alt="<%= item.product.name %>" style="width:60px;height:75px;object-fit:cover;border-radius:var(--radius-sm);flex-shrink:0;">
+                                                                                <div style="flex:1;min-width:0;">
+                                                                                    <h4 style="font-family:var(--font-serif);font-size:1rem;font-weight:400;color:var(--primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                                                                                        <%= item.product.name %>
+                                                                                    </h4>
+                                                                                    <p style="font-size:0.78rem;color:var(--text-muted);margin-top:0.2rem;">Qty:
+                                                                                        <%= item.quantity %>
+                                                                                    </p>
+                                                                                </div>
+                                                                                <div style="font-size:0.9rem;font-weight:600;color:var(--gold);flex-shrink:0;">Rs
+                                                                                    <%= (item.price * item.quantity).toFixed(2) %>
+                                                                                </div>
                                                                             </div>
-                                                                            <div style="font-size:0.9rem;font-weight:600;color:var(--gold);flex-shrink:0;">Rs
-                                                                                <%= (item.price * item.quantity).toFixed(2) %>
-                                                                            </div>
-                                                                        </div>
-                                                                        <% }); %>
+                                                                            <% } else { %>
+                                                                                <div style="display:flex;gap:1rem;align-items:center;padding:0.8rem 0;border-bottom:1px solid var(--border);opacity:0.6;">
+                                                                                    <img src="/images/p1.jpeg" alt="Product Removed" style="width:60px;height:75px;object-fit:cover;border-radius:var(--radius-sm);flex-shrink:0;filter:grayscale(100%);">
+                                                                                    <div style="flex:1;min-width:0;">
+                                                                                        <h4 style="font-family:var(--font-serif);font-size:1rem;font-weight:400;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                                                                                            Product Removed
+                                                                                        </h4>
+                                                                                        <p style="font-size:0.78rem;color:var(--text-muted);margin-top:0.2rem;">Qty:
+                                                                                            <%= item.quantity %>
+                                                                                        </p>
+                                                                                    </div>
+                                                                                    <div style="font-size:0.9rem;font-weight:600;color:var(--text-muted);flex-shrink:0;">Rs
+                                                                                        <%= (item.price * item.quantity).toFixed(2) %>
+                                                                                    </div>
+                                                                                </div>
+                                                                                <% } %>
+                                                                                    <% }); %>
                                                                 </div>
 
                                                                 <!-- Order Actions -->
@@ -383,59 +400,59 @@
         </section>
     </main>
 
-    <script>
-        function switchTab(tab) {
-            window.location.href = '/account?tab=' + tab;
-        }
+    <%- include('partials/footer') %>
 
-        async function cancelOrder(orderId) {
-            if (!confirm('Are you sure you want to cancel this order?')) return;
-            try {
-                const response = await fetch(`/orders/${orderId}/cancel`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
+        <script>
+            function switchTab(tab) {
+                window.location.href = '/account?tab=' + tab;
+            }
+
+            async function cancelOrder(orderId) {
+                if (!confirm('Are you sure you want to cancel this order?')) return;
+                try {
+                    const response = await fetch(`/orders/${orderId}/cancel`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    const data = await response.json();
+                    if (data.success) {
+                        showNotification(data.message, 'success');
+                        setTimeout(() => location.reload(), 1000);
+                    } else {
+                        showNotification(data.message, 'error');
+                    }
+                } catch (error) {
+                    showNotification('Failed to cancel order', 'error');
+                }
+            }
+
+            // Scroll reveal
+            const revealObserver = new IntersectionObserver((entries) => {
+                entries.forEach(e => {
+                    if (e.isIntersecting) {
+                        e.target.classList.add('visible');
+                        revealObserver.unobserve(e.target);
                     }
                 });
-                const data = await response.json();
-                if (data.success) {
-                    showNotification(data.message, 'success');
-                    setTimeout(() => location.reload(), 1000);
-                } else {
-                    showNotification(data.message, 'error');
-                }
-            } catch (error) {
-                showNotification('Failed to cancel order', 'error');
-            }
-        }
-
-        // Scroll reveal
-        const revealObserver = new IntersectionObserver((entries) => {
-            entries.forEach(e => {
-                if (e.isIntersecting) {
-                    e.target.classList.add('visible');
-                    revealObserver.unobserve(e.target);
-                }
+            }, {
+                threshold: 0.08
             });
-        }, {
-            threshold: 0.08
-        });
-        document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+            document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
 
-        // Mobile menu
-        const toggle = document.querySelector('.mobile-menu-toggle');
-        const menu = document.querySelector('.nav-menu');
-        const overlay = document.querySelector('.nav-overlay');
-        if (toggle && menu) {
-            function toggleMenu(open) {
-                toggle.classList.toggle('open', open);
-                menu.classList.toggle('active', open);
-                overlay && overlay.classList.toggle('active', open);
-                document.body.style.overflow = open ? 'hidden' : '';
+            // Mobile menu
+            const toggle = document.querySelector('.mobile-menu-toggle');
+            const menu = document.querySelector('.nav-menu');
+            const overlay = document.querySelector('.nav-overlay');
+            if (toggle && menu) {
+                function toggleMenu(open) {
+                    toggle.classList.toggle('open', open);
+                    menu.classList.toggle('active', open);
+                    overlay && overlay.classList.toggle('active', open);
+                    document.body.style.overflow = open ? 'hidden' : '';
+                }
+                toggle.addEventListener('click', () => toggleMenu(!menu.classList.contains('active')));
+                overlay && overlay.addEventListener('click', () => toggleMenu(false));
             }
-            toggle.addEventListener('click', () => toggleMenu(!menu.classList.contains('active')));
-            overlay && overlay.addEventListener('click', () => toggleMenu(false));
-        }
-    </script>
-
-    <%- include('partials/footer') %>
+        </script>

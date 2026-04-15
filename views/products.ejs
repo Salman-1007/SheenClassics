@@ -18,10 +18,8 @@
                         <span class="filter-label">Category</span>
                         <select id="category-filter" class="filter-select" onchange="filterProducts()">
                         <option value="">All</option>
-                        <option value="Men"         <%= currentCategory === 'Men'         ? 'selected' : '' %>>Men</option>
-                        <option value="Women"       <%= currentCategory === 'Women'       ? 'selected' : '' %>>Women</option>
-                        <option value="Kids"        <%= currentCategory === 'Kids'        ? 'selected' : '' %>>Kids</option>
-                        <option value="Accessories" <%= currentCategory === 'Accessories' ? 'selected' : '' %>>Accessories</option>
+                        <option value="Clothing"  <%= currentCategory === 'Clothing'  ? 'selected' : '' %>>Clothing</option>
+                        <option value="HomeDecor" <%= currentCategory === 'HomeDecor' ? 'selected' : '' %>>Home Decor</option>
                     </select>
                     </div>
 
@@ -82,11 +80,6 @@
                                                 <span class="product-badge sale">Sale</span>
                                                 <% } %>
 
-                                                    <div class="product-overlay">
-                                                        <button class="product-quick-add" onclick="event.stopPropagation(); addToCart('<%= product._id %>')">
-                                Quick Add to Cart
-                            </button>
-                                                    </div>
                                         </div>
 
                                         <div class="product-info">
@@ -108,10 +101,10 @@
                                             </div>
 
                                             <div class="product-actions">
-                                                <button class="btn btn-add-cart" onclick="event.stopPropagation(); addToCart('<%= product._id %>')">
+                                                <button class="btn btn-add-cart" onclick="if (event) event.stopPropagation(); addToCart('<%= product._id %>')">
                                 <span>Add to Cart</span>
                             </button>
-                                                <button class="btn btn-wishlist" onclick="event.stopPropagation(); addToWishlist('<%= product._id %>')" title="Wishlist">♡</button>
+                                                <button class="btn btn-wishlist" onclick="if (event) event.stopPropagation(); addToWishlist('<%= product._id %>')" title="Wishlist">♡</button>
                                             </div>
                                         </div>
                                     </div>
@@ -219,4 +212,3 @@
     </script>
 
     <%- include('partials/footer') %>
-
