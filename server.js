@@ -4,7 +4,17 @@ const session = require('express-session');
 const MongoStore = require('connect-mongo');
 const path = require('path');
 const helmet = require('helmet');
+const Product = require('./models/Product');
+const dns = require('dns');
 require('dotenv').config();
+
+const configuredDnsServers = process.env.DNS_SERVERS
+    ? process.env.DNS_SERVERS.split(',').map(server => server.trim()).filter(Boolean)
+    : null;
+const activeDnsServers = configuredDnsServers || dns.getServers();
+if (configuredDnsServers || activeDnsServers.every(server => server === '127.0.0.1' || server === '::1')) {
+    dns.setServers(configuredDnsServers || ['8.8.8.8', '1.1.1.1']);
+}
 
 const app = express();
 
@@ -75,6 +85,61 @@ app.use((req, res, next) => {
     next();
 });
 
+function escapeXml(value) {
+    return String(value || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&apos;');
+}
+
+app.get(['/sitemap.xml', '/api/sitemap'], async(req, res, next) => {
+    try {
+        const products = await Product.find({}).select('_id slug updatedAt createdAt').lean();
+        const baseUrl = `${req.protocol}://${req.get('host')}`;
+        const staticPages = [
+            { url: '/', priority: '1.0', freq: 'daily' },
+            { url: '/products', priority: '0.9', freq: 'daily' },
+            { url: '/account', priority: '0.6', freq: 'monthly' }
+        ];
+
+        const productUrls = products.map(product => ({
+            url: `/products/${product.slug || product._id}`,
+            lastmod: new Date(product.updatedAt || product.createdAt || Date.now()).toISOString(),
+            priority: '0.8',
+            freq: 'weekly'
+        }));
+
+        const urls = [...staticPages, ...productUrls];
+        const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${urls.map(item => `  <url>
+    <loc>${escapeXml(baseUrl + item.url)}</loc>
+    ${item.lastmod ? `<lastmod>${escapeXml(item.lastmod)}</lastmod>` : ''}
+    <changefreq>${item.freq}</changefreq>
+    <priority>${item.priority}</priority>
+  </url>`).join('\n')}
+</urlset>`;
+
+        res.setHeader('Content-Type', 'application/xml');
+        res.setHeader('Cache-Control', 'public, max-age=86400');
+        res.send(xml);
+    } catch (error) {
+        next(error);
+    }
+});
+
+app.get('/robots.txt', (req, res) => {
+    const baseUrl = `${req.protocol}://${req.get('host')}`;
+    res.type('text/plain').send(`User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /api/
+
+Sitemap: ${baseUrl}/sitemap.xml`);
+});
+
 // Database connection
 if (!process.env.MONGODB_URI) {
     console.error("MONGODB_URI not defined");
@@ -95,9 +160,19 @@ app.use('/products', require('./routes/products'));
 app.use('/cart', require('./routes/cart'));
 app.use('/wishlist', require('./routes/wishlist'));
 app.use('/orders', require('./routes/orders'));
+app.use('/blogs', require('./routes/blogs'));
 app.use('/chatbot', require('./routes/chat'));
+app.post('/api/chat', (req, res, next) => {
+    const chatController = require('./controllers/chatController');
+    const messages = Array.isArray(req.body.messages) ? req.body.messages : [];
+    const lastUserMessage = [...messages].reverse().find(message => message.role === 'user');
+    req.body.message = lastUserMessage ? lastUserMessage.content : req.body.message;
+    req.body.history = messages.slice(0, -1);
+    chatController.sendMessage(req, res, next);
+});
 app.use('/account', require('./routes/account'));
 app.use('/admin', require('./routes/admin'));
+app.use('/api/admin', require('./routes/admin'));
 
 // Error handling middleware
 app.use((err, req, res, next) => {

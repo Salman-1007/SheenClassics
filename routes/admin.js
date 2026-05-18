@@ -28,6 +28,12 @@ const upload = multer({
 });
 
 router.get('/dashboard', isAdmin, adminController.getDashboard);
+router.get('/low-stock', isAdmin, adminController.getLowStock);
+router.post('/generate-seo', isAdmin, adminController.generateSeo);
+router.get('/seo-studio', isAdmin, adminController.getSeoStudio);
+router.post('/generate-content', isAdmin, adminController.generateContent);
+router.post('/blogs', isAdmin, adminController.saveBlog);
+router.post('/blogs/:id/delete', isAdmin, adminController.deleteBlog);
 router.get('/products', isAdmin, adminController.getProducts);
 router.get('/products/add', isAdmin, adminController.getAddProduct);
 // Accept both multi-image field `images` and legacy single `image` for compatibility

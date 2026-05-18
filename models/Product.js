@@ -56,6 +56,21 @@ const productSchema = new mongoose.Schema({
         default: 250,
         min: 0
     },
+    seoTitle: {
+        type: String,
+        default: '',
+        trim: true
+    },
+    seoDescription: {
+        type: String,
+        default: '',
+        trim: true
+    },
+    seoKeywords: {
+        type: String,
+        default: '',
+        trim: true
+    },
     metaTitle: {
         type: String,
         trim: true
@@ -84,11 +99,16 @@ const productSchema = new mongoose.Schema({
         type: String,
         trim: true
     },
+    structuredDataType: {
+        type: String,
+        default: 'Product',
+        trim: true
+    },
     createdAt: {
         type: Date,
         default: Date.now
     }
-});
+}, { timestamps: true });
 
 // Auto-generate slug from product name
 productSchema.pre('save', async function(next) {

@@ -44,7 +44,7 @@
 
                     <div class="product-grid">
                         <% featuredProducts.forEach((product, i) => { %>
-                            <div class="product-card reveal reveal-delay-<%= Math.min(i % 4 + 1, 4) %>" onclick="window.location.href='/products/<%= product._id %>'">
+                            <div class="product-card reveal reveal-delay-<%= Math.min(i % 4 + 1, 4) %>" onclick="window.location.href='/products/<%= product.slug || product._id %>'">
 
                                 <div class="product-image-wrap">
                                     <img src="<%= product.images && product.images[0] ? product.images[0] : '/images/p1.jpeg' %>" alt="<%= product.name %>" class="product-image" loading="lazy">
@@ -96,35 +96,40 @@
             <% } %>
 
                 <!-- ===========================
-         GALLERY STRIP
+         BLOGS
          =========================== -->
-                <section class="gallery-section">
+                <section class="blog-section">
                     <div class="container">
                         <div class="section-header reveal" style="margin-bottom:2.5rem;">
-                            <span class="section-eyebrow">The Craft</span>
-                            <h2 class="section-title">Every Thread, <em>a Story</em></h2>
+                            <span class="section-eyebrow">Style Notes</span>
+                            <h2 class="section-title">From the <em>Journal</em></h2>
                             <div class="section-divider"></div>
                         </div>
 
-                        <div class="gallery-grid reveal">
-                            <div class="gallery-item">
-                                <img src="/images/EMB1.jpeg" alt="Embroidered Design 1" loading="lazy">
+                        <div class="blog-carousel reveal" id="blog-carousel">
+                            <button type="button" class="blog-nav blog-nav-prev" aria-label="Previous blog">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+                            </button>
+                            <div class="blog-track" id="blog-track">
+                                <% const fallbackBlogs = [
+                                    { category: 'Embroidery Guide', title: 'How to Style Embroidered Pieces for Everyday Wear', excerpt: 'Classic embroidery can feel effortless with the right pairings. Build looks around clean silhouettes, balanced color, and one standout detail.' },
+                                    { category: 'Care Notes', title: 'Keeping Premium Fabrics Fresh Longer', excerpt: 'Gentle washing, shade drying, and careful storage protect fabric texture and threadwork so your favorites stay beautiful season after season.' },
+                                    { category: 'Buying Guide', title: 'Choosing Occasion Wear That Still Feels Comfortable', excerpt: 'Look for breathable fabrics, thoughtful details, and versatile colors that move naturally from family gatherings to formal evenings.' }
+                                ]; %>
+                                <% const visibleBlogs = blogs && blogs.length ? blogs : fallbackBlogs; %>
+                                <% visibleBlogs.forEach(function(blog) { %>
+                                    <article class="blog-card">
+                                        <p class="blog-meta"><%= blog.category || 'Style Notes' %></p>
+                                        <h3><%= blog.title %></h3>
+                                        <p><%= blog.excerpt || (blog.content ? blog.content.replace(/[#*_`>-]/g, '').slice(0, 180) : '') %></p>
+                                        <a href="<%= blog.slug ? '/blogs/' + blog.slug : '/products' %>" class="blog-link"><%= blog.slug ? 'Read article' : 'Explore pieces' %></a>
+                                    </article>
+                                <% }); %>
                             </div>
-                            <div class="gallery-item">
-                                <img src="/images/EMB2.jpeg" alt="Embroidered Design 2" loading="lazy">
-                            </div>
-                            <div class="gallery-item">
-                                <img src="/images/p1.jpeg" alt="Product 1" loading="lazy">
-                            </div>
-                            <div class="gallery-item">
-                                <img src="/images/p2.jpeg" alt="Product 2" loading="lazy">
-                            </div>
-                            <div class="gallery-item">
-                                <img src="/images/bag.jpeg" alt="Bag" loading="lazy">
-                            </div>
-                            <div class="gallery-item">
-                                <img src="/images/mypic.jpeg" alt="Collection" loading="lazy">
-                            </div>
+                            <button type="button" class="blog-nav blog-nav-next" aria-label="Next blog">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+                            </button>
+                            <div class="blog-dots" id="blog-dots" aria-label="Blog carousel pagination"></div>
                         </div>
                     </div>
                 </section>
@@ -246,6 +251,69 @@
 
             toggle.addEventListener('click', () => toggleMenu(!menu.classList.contains('active')));
             overlay && overlay.addEventListener('click', () => toggleMenu(false));
+        }
+
+        const blogTrack = document.getElementById('blog-track');
+        const blogCarousel = document.getElementById('blog-carousel');
+        const blogDots = document.getElementById('blog-dots');
+        if (blogTrack && blogCarousel && blogDots) {
+            const cards = Array.from(blogTrack.querySelectorAll('.blog-card'));
+            const prev = blogCarousel.querySelector('.blog-nav-prev');
+            const next = blogCarousel.querySelector('.blog-nav-next');
+
+            function cardStep() {
+                const first = cards[0];
+                if (!first) return 0;
+                const styles = window.getComputedStyle(blogTrack);
+                return first.getBoundingClientRect().width + parseFloat(styles.columnGap || styles.gap || 0);
+            }
+
+            function visibleCount() {
+                const step = cardStep();
+                return step ? Math.max(1, Math.round(blogTrack.clientWidth / step)) : 1;
+            }
+
+            function pages() {
+                return Math.max(1, Math.ceil(cards.length / visibleCount()));
+            }
+
+            function currentPage() {
+                const step = cardStep();
+                return step ? Math.round(blogTrack.scrollLeft / (step * visibleCount())) : 0;
+            }
+
+            function renderDots() {
+                const total = pages();
+                blogDots.innerHTML = '';
+                for (let i = 0; i < total; i++) {
+                    const dot = document.createElement('button');
+                    dot.type = 'button';
+                    dot.className = 'blog-dot';
+                    dot.setAttribute('aria-label', `Go to blog page ${i + 1}`);
+                    dot.addEventListener('click', () => {
+                        blogTrack.scrollTo({ left: i * cardStep() * visibleCount(), behavior: 'smooth' });
+                    });
+                    blogDots.appendChild(dot);
+                }
+                updateDots();
+            }
+
+            function updateDots() {
+                const page = currentPage();
+                blogDots.querySelectorAll('.blog-dot').forEach((dot, index) => {
+                    dot.classList.toggle('active', index === page);
+                });
+            }
+
+            prev && prev.addEventListener('click', () => {
+                blogTrack.scrollBy({ left: -cardStep() * visibleCount(), behavior: 'smooth' });
+            });
+            next && next.addEventListener('click', () => {
+                blogTrack.scrollBy({ left: cardStep() * visibleCount(), behavior: 'smooth' });
+            });
+            blogTrack.addEventListener('scroll', updateDots, { passive: true });
+            window.addEventListener('resize', renderDots);
+            renderDots();
         }
     </script>
 

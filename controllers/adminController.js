@@ -2,8 +2,13 @@
 const Order = require('../models/Order');
 const Coupon = require('../models/Coupon');
 const User = require('../models/User');
+const Blog = require('../models/Blog');
 const cloudinary = require('cloudinary').v2;
 const streamifier = require('streamifier');
+const groqService = require('../services/groqService');
+
+const LOW_STOCK_THRESHOLD = 5;
+const CONTENT_TYPES = ['product-description', 'category-intro', 'blog-post', 'homepage-hero', 'about-snippet'];
 
 // Helper: upload a buffer to Cloudinary and return the result
 function uploadBufferToCloudinary(buffer, options = {}) {
@@ -88,6 +93,9 @@ exports.postAddProduct = async(req, res) => {
             metaTitle,
             metaDescription,
             metaKeywords,
+            seoTitle,
+            seoDescription,
+            seoKeywords,
             canonicalUrl,
             ogTitle,
             ogDescription,
@@ -95,7 +103,7 @@ exports.postAddProduct = async(req, res) => {
         } = req.body;
 
         // Validate required fields
-        if (!name || !description || !price || !category || !stock) {
+        if (!name || !description || !price || !category || stock === undefined || stock === '') {
             return res.status(400).render('admin/add-product', {
                 title: 'Add Product - SheenClassics',
                 error: 'All required fields must be filled: name, description, price, category, and stock'
@@ -155,9 +163,12 @@ exports.postAddProduct = async(req, res) => {
                 featured: featured === 'on',
                 images,
                 shippingFee: shippingFee ? parseFloat(shippingFee) : 250,
-                metaTitle: metaTitle || undefined,
-                metaDescription: metaDescription || undefined,
-                metaKeywords: metaKeywords || undefined,
+                seoTitle: seoTitle || metaTitle || '',
+                seoDescription: seoDescription || metaDescription || '',
+                seoKeywords: seoKeywords || metaKeywords || '',
+                metaTitle: metaTitle || seoTitle || undefined,
+                metaDescription: metaDescription || seoDescription || undefined,
+                metaKeywords: metaKeywords || seoKeywords || undefined,
                 canonicalUrl: canonicalUrl || undefined,
                 ogTitle: ogTitle || undefined,
                 ogDescription: ogDescription || undefined,
@@ -223,6 +234,9 @@ exports.postEditProduct = async(req, res) => {
             metaTitle,
             metaDescription,
             metaKeywords,
+            seoTitle,
+            seoDescription,
+            seoKeywords,
             canonicalUrl,
             ogTitle,
             ogDescription,
@@ -240,9 +254,12 @@ exports.postEditProduct = async(req, res) => {
             stock: parseInt(stock),
             featured: featured === 'on',
             shippingFee: shippingFee ? parseFloat(shippingFee) : undefined,
-            metaTitle: metaTitle || undefined,
-            metaDescription: metaDescription || undefined,
-            metaKeywords: metaKeywords || undefined,
+            seoTitle: seoTitle || metaTitle || '',
+            seoDescription: seoDescription || metaDescription || '',
+            seoKeywords: seoKeywords || metaKeywords || '',
+            metaTitle: metaTitle || seoTitle || undefined,
+            metaDescription: metaDescription || seoDescription || undefined,
+            metaKeywords: metaKeywords || seoKeywords || undefined,
             canonicalUrl: canonicalUrl || undefined,
             ogTitle: ogTitle || undefined,
             ogDescription: ogDescription || undefined,
@@ -376,5 +393,160 @@ exports.getUsers = async(req, res) => {
             title: 'Error - SheenClassics',
             error: 'Failed to load users'
         });
+    }
+};
+
+exports.generateSeo = async(req, res) => {
+    try {
+        const { productName, productDescription, category, price } = req.body;
+
+        if (!productName || !productName.trim()) {
+            return res.status(400).json({ error: 'Product name required' });
+        }
+
+        const prompt = `Generate SEO metadata for an e-commerce product listed on SheenClassics.
+Product Name: ${productName}
+Category: ${category || 'General'}
+Description: ${productDescription || 'Not provided'}
+Price: ${price ? `Rs ${price}` : 'Not provided'}
+
+Return ONLY a valid JSON object with these exact keys:
+{
+  "seoTitle": "60 chars max, compelling, includes product name and key benefit",
+  "seoDescription": "150-160 chars, includes a call-to-action and unique selling point",
+  "seoKeywords": "8-12 comma-separated keywords, mix of short and long-tail",
+  "ogTitle": "Social share title, engaging, under 60 chars",
+  "ogDescription": "Social share description, under 200 chars"
+}`;
+
+        const raw = await groqService.callGroq([{ role: 'user', content: prompt }], '', 512, { temperature: 0.4 });
+        const parsed = groqService.parseJsonFromAi(raw);
+
+        return res.json({
+            seoTitle: parsed.seoTitle || '',
+            seoDescription: parsed.seoDescription || '',
+            seoKeywords: parsed.seoKeywords || '',
+            ogTitle: parsed.ogTitle || '',
+            ogDescription: parsed.ogDescription || ''
+        });
+    } catch (error) {
+        console.error('SEO generation error:', error);
+        return res.status(500).json({ error: 'Failed to generate SEO metadata' });
+    }
+};
+
+exports.getLowStock = async(req, res) => {
+    try {
+        const lowStockProducts = await Product.find({
+            stock: { $lte: LOW_STOCK_THRESHOLD, $gt: 0 }
+        }).select('name stock _id images slug').sort({ stock: 1 }).limit(20);
+
+        const outOfStock = await Product.find({ stock: 0 })
+            .select('name stock _id images slug').sort({ updatedAt: -1 }).limit(10);
+
+        return res.json({ lowStockProducts, outOfStock, threshold: LOW_STOCK_THRESHOLD });
+    } catch (error) {
+        console.error('Low stock check error:', error);
+        return res.status(500).json({ error: 'Failed to check stock levels' });
+    }
+};
+
+exports.getSeoStudio = (req, res) => {
+    Blog.find().sort({ createdAt: -1 }).limit(50)
+        .then(blogs => {
+            res.render('admin/seo-studio', {
+                title: 'AI SEO Content Studio - SheenClassics',
+                query: req.query,
+                blogs
+            });
+        })
+        .catch(error => {
+            console.error('Error loading SEO studio:', error);
+            res.status(500).render('error', {
+                title: 'Error - SheenClassics',
+                error: 'Failed to load SEO Content Studio'
+            });
+        });
+};
+
+exports.generateContent = async(req, res) => {
+    try {
+        const { type, context = {} } = req.body;
+
+        if (!CONTENT_TYPES.includes(type)) {
+            return res.status(400).json({ error: 'Invalid content type' });
+        }
+
+        const prompts = {
+            'product-description': `Write an SEO-optimized product description for SheenClassics.
+Product Name: ${context.name || 'Product'}
+Category: ${context.category || 'General'}
+Key Features: ${context.features || 'Not specified'}
+Target Audience: ${context.audience || 'General shoppers'}
+Tone: Premium, trustworthy, elegant.
+Write 2-3 paragraphs with a hook, useful details, and a gentle call-to-action. Output plain text only.`,
+            'category-intro': `Write a 100-150 word SEO-optimized category introduction for the "${context.categoryName || 'Featured'}" category on SheenClassics. Mention quality, product breadth, and a gentle call to action. Plain text only.`,
+            'blog-post': `Write a complete SEO-optimized blog post for SheenClassics.
+Topic: ${context.topic || 'Classic style essentials'}
+Target keyword: ${context.keyword || context.topic || 'classic style'}
+Word count: approximately 500 words.
+Use markdown with one H1, 3-4 H2 sections, and a conclusion with CTA.`,
+            'homepage-hero': `Write 3 variations of homepage hero copy for SheenClassics. Each variation must have headline max 8 words, subheading max 20 words, CTA max 4 words. Return ONLY a JSON array with keys headline, subheading, cta.`,
+            'about-snippet': `Write a 100-word SEO-optimized About Us snippet for SheenClassics. Emphasize quality, trust, and classic style. Make it warm and human. Plain text only.`
+        };
+
+        const raw = await groqService.callGroq([{ role: 'user', content: prompts[type] }], '', 1024);
+        const content = type === 'homepage-hero' ? groqService.parseJsonFromAi(raw) : raw.trim();
+
+        return res.json({ content, type });
+    } catch (error) {
+        console.error('Content generation error:', error);
+        return res.status(500).json({ error: 'Content generation failed. Please try again.' });
+    }
+};
+
+exports.saveBlog = async(req, res) => {
+    try {
+        const {
+            title,
+            category,
+            excerpt,
+            content,
+            seoTitle,
+            seoDescription,
+            featured,
+            published
+        } = req.body;
+
+        if (!title || !content) {
+            return res.redirect('/admin/seo-studio?error=Blog title and content are required');
+        }
+
+        const blog = new Blog({
+            title: title.trim(),
+            category: category || 'Style Notes',
+            excerpt: excerpt || content.replace(/\s+/g, ' ').slice(0, 180),
+            content,
+            seoTitle: seoTitle || '',
+            seoDescription: seoDescription || '',
+            featured: featured === 'on',
+            published: published !== 'off'
+        });
+
+        await blog.save();
+        res.redirect('/admin/seo-studio?success=Blog saved and linked to home page');
+    } catch (error) {
+        console.error('Error saving blog:', error);
+        res.redirect('/admin/seo-studio?error=Failed to save blog');
+    }
+};
+
+exports.deleteBlog = async(req, res) => {
+    try {
+        await Blog.findByIdAndDelete(req.params.id);
+        res.redirect('/admin/seo-studio?success=Blog deleted');
+    } catch (error) {
+        console.error('Error deleting blog:', error);
+        res.redirect('/admin/seo-studio?error=Failed to delete blog');
     }
 };

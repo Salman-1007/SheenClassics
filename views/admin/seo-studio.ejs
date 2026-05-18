@@ -1,0 +1,247 @@
+<%- include('../partials/header') %>
+
+<main>
+    <section class="section" style="padding-top:3rem;">
+        <div class="container" style="max-width:1100px;">
+            <div class="reveal" style="display:flex;justify-content:space-between;align-items:center;gap:1rem;margin-bottom:2rem;flex-wrap:wrap;">
+                <div>
+                    <span style="font-size:0.7rem;font-weight:600;letter-spacing:0.25em;text-transform:uppercase;color:var(--gold);display:block;margin-bottom:0.4rem;">Admin AI</span>
+                    <h1 style="font-family:var(--font-serif);font-size:2.2rem;font-weight:300;color:var(--primary);">SEO Content <em style="color:var(--gold);">Studio</em></h1>
+                </div>
+                <a href="/admin/dashboard" class="btn btn-add-cart" style="text-decoration:none;padding:0.75rem 1.2rem;">Dashboard</a>
+            </div>
+
+            <% if (typeof query !== 'undefined' && query.success) { %>
+                <div class="success-message reveal" style="margin-bottom:1.5rem;"><%= query.success %></div>
+            <% } %>
+            <% if (typeof query !== 'undefined' && query.error) { %>
+                <div class="error-message reveal" style="margin-bottom:1.5rem;"><%= query.error %></div>
+            <% } %>
+
+            <div style="display:grid;grid-template-columns:minmax(0,1.15fr) minmax(320px,0.85fr);gap:1.5rem;align-items:start;">
+                <form action="/admin/blogs" method="POST" class="reveal" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-xl);padding:2rem;">
+                    <div style="display:flex;justify-content:space-between;gap:1rem;align-items:flex-start;margin-bottom:1.5rem;flex-wrap:wrap;">
+                        <div>
+                            <h2 style="font-family:var(--font-serif);font-size:1.45rem;font-weight:400;color:var(--primary);margin-bottom:0.25rem;">Blog Workspace</h2>
+                            <p style="font-size:0.85rem;color:var(--text-muted);margin:0;">Write manually or generate a draft with AI, then save it to the home page blog carousel.</p>
+                        </div>
+                        <button type="submit" class="btn btn-add-cart" style="padding:0.75rem 1.2rem;">Save Blog</button>
+                    </div>
+
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+                        <div class="form-group">
+                            <label>Blog Title</label>
+                            <input type="text" name="title" id="blog-title" required placeholder="e.g. How to Style Embroidered Pieces">
+                        </div>
+                        <div class="form-group">
+                            <label>Category</label>
+                            <input type="text" name="category" id="blog-category" value="Style Notes" placeholder="Style Notes">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Excerpt</label>
+                        <textarea name="excerpt" id="blog-excerpt" rows="3" placeholder="Short summary shown on the home page carousel..." style="width:100%;padding:0.85rem 1rem;background:var(--cream);border:1.5px solid var(--border);border-radius:var(--radius);font-family:var(--font-body);font-size:0.95rem;resize:vertical;"></textarea>
+                    </div>
+
+                    <label style="font-size:0.72rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-muted);display:block;margin-bottom:0.8rem;">Creation Mode</label>
+                    <div style="display:flex;gap:0.6rem;flex-wrap:wrap;margin-bottom:1rem;">
+                        <button type="button" class="studio-mode-btn active" data-mode="manual">Write Manually</button>
+                        <button type="button" class="studio-mode-btn" data-mode="ai">Generate with AI</button>
+                    </div>
+
+                    <div id="ai-panel" style="display:none;background:var(--cream);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1rem;margin-bottom:1rem;">
+                        <label style="font-size:0.72rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-muted);display:block;margin-bottom:0.8rem;">AI Content Type</label>
+                        <select id="content-type" class="filter-select" style="width:100%;margin-bottom:1rem;">
+                            <option value="blog-post">Blog Post</option>
+                            <option value="category-intro">Category Intro</option>
+                            <option value="product-description">Product Description</option>
+                            <option value="homepage-hero">Homepage Hero Copy</option>
+                            <option value="about-snippet">About Snippet</option>
+                        </select>
+                        <div id="context-fields" style="display:grid;gap:0.8rem;margin-bottom:1rem;"></div>
+                        <button type="button" id="generate-content-btn" class="btn btn-add-cart" style="padding:0.75rem 1rem;">Generate Draft</button>
+                        <p id="studio-error" style="display:none;color:#c0392b;font-size:0.85rem;margin-top:0.8rem;"></p>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Blog Content</label>
+                        <textarea name="content" id="blog-content" rows="16" required placeholder="Write your blog content here..." style="width:100%;padding:1rem;background:var(--cream);border:1.5px solid var(--border);border-radius:var(--radius);font-family:var(--font-body);font-size:0.95rem;line-height:1.75;resize:vertical;"></textarea>
+                    </div>
+
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+                        <div class="form-group">
+                            <label>SEO Title</label>
+                            <input type="text" name="seoTitle" id="seo-title" maxlength="60" placeholder="Optional search title">
+                        </div>
+                        <div class="form-group">
+                            <label>SEO Description</label>
+                            <input type="text" name="seoDescription" id="seo-description" maxlength="160" placeholder="Optional search description">
+                        </div>
+                    </div>
+
+                    <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-top:0.5rem;">
+                        <label style="display:flex;align-items:center;gap:0.5rem;font-size:0.85rem;color:var(--text-secondary);">
+                            <input type="checkbox" name="featured" style="width:auto;"> Featured
+                        </label>
+                        <label style="display:flex;align-items:center;gap:0.5rem;font-size:0.85rem;color:var(--text-secondary);">
+                            <input type="checkbox" name="published" checked style="width:auto;"> Published on Home
+                        </label>
+                    </div>
+                </form>
+
+                <aside class="reveal reveal-delay-1" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-xl);padding:1.5rem;">
+                    <h2 style="font-family:var(--font-serif);font-size:1.35rem;font-weight:400;color:var(--primary);margin-bottom:1rem;">Saved Blogs</h2>
+                    <% if (blogs && blogs.length) { %>
+                        <div style="display:flex;flex-direction:column;gap:0.85rem;">
+                            <% blogs.forEach(function(blog) { %>
+                                <div style="border:1px solid var(--border);border-radius:var(--radius);padding:1rem;background:var(--cream);">
+                                    <p style="font-size:0.68rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--gold);margin-bottom:0.35rem;"><%= blog.category %> <%= blog.published ? '' : ' / Draft' %></p>
+                                    <h3 style="font-family:var(--font-serif);font-size:1.1rem;font-weight:400;color:var(--primary);line-height:1.25;margin-bottom:0.45rem;"><%= blog.title %></h3>
+                                    <p style="font-size:0.8rem;color:var(--text-muted);line-height:1.6;margin-bottom:0.75rem;"><%= blog.excerpt || blog.content.slice(0, 120) %></p>
+                                    <form action="/admin/blogs/<%= blog._id %>/delete" method="POST" onsubmit="return confirm('Delete this blog?');">
+                                        <button type="submit" style="padding:0.45rem 0.75rem;border:1px solid var(--border);background:#fff;border-radius:var(--radius-sm);font-size:0.75rem;font-weight:700;color:#c0392b;">Delete</button>
+                                    </form>
+                                </div>
+                            <% }); %>
+                        </div>
+                    <% } else { %>
+                        <p style="font-size:0.85rem;color:var(--text-muted);line-height:1.7;">No blogs saved yet. Create one here and it will appear in the home page blog carousel.</p>
+                    <% } %>
+                </aside>
+            </div>
+        </div>
+    </section>
+</main>
+
+<style>
+    .studio-mode-btn {
+        padding: 0.65rem 1rem;
+        border: 1.5px solid var(--border);
+        background: #fff;
+        border-radius: var(--radius-sm);
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+
+    .studio-mode-btn.active {
+        border-color: var(--gold);
+        background: var(--gold-pale);
+    }
+
+    @media (max-width: 900px) {
+        main .container > div[style*="grid-template-columns"] {
+            grid-template-columns: 1fr !important;
+        }
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const modeButtons = document.querySelectorAll('.studio-mode-btn');
+        const aiPanel = document.getElementById('ai-panel');
+        const typeSelect = document.getElementById('content-type');
+        const contextFields = document.getElementById('context-fields');
+        const generateButton = document.getElementById('generate-content-btn');
+        const errorEl = document.getElementById('studio-error');
+        const titleField = document.getElementById('blog-title');
+        const categoryField = document.getElementById('blog-category');
+        const excerptField = document.getElementById('blog-excerpt');
+        const contentField = document.getElementById('blog-content');
+        const seoTitleField = document.getElementById('seo-title');
+        const seoDescriptionField = document.getElementById('seo-description');
+
+        const fieldTemplates = {
+            'blog-post': [
+                ['topic', 'Blog Topic', 'input'],
+                ['keyword', 'Target Keyword', 'input']
+            ],
+            'category-intro': [
+                ['categoryName', 'Category Name', 'input']
+            ],
+            'product-description': [
+                ['name', 'Product Name', 'input'],
+                ['category', 'Category', 'input'],
+                ['features', 'Key Features', 'textarea'],
+                ['audience', 'Target Audience', 'input']
+            ],
+            'homepage-hero': [],
+            'about-snippet': []
+        };
+
+        function renderContextFields() {
+            const fields = fieldTemplates[typeSelect.value] || [];
+            if (!fields.length) {
+                contextFields.innerHTML = '<p style="color:var(--text-muted);font-size:0.82rem;margin:0;">No extra input needed.</p>';
+                return;
+            }
+
+            contextFields.innerHTML = fields.map(([name, placeholder, type]) => {
+                if (type === 'textarea') {
+                    return `<textarea name="${name}" rows="2" placeholder="${placeholder}" style="width:100%;padding:0.75rem 0.9rem;background:#fff;border:1.5px solid var(--border);border-radius:var(--radius);font-family:var(--font-body);font-size:0.9rem;resize:vertical;"></textarea>`;
+                }
+                return `<input type="text" name="${name}" placeholder="${placeholder}">`;
+            }).join('');
+        }
+
+        modeButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                modeButtons.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+                aiPanel.style.display = button.dataset.mode === 'ai' ? 'block' : 'none';
+            });
+        });
+
+        typeSelect.addEventListener('change', renderContextFields);
+
+        generateButton.addEventListener('click', async() => {
+            const context = {};
+            contextFields.querySelectorAll('[name]').forEach(field => {
+                context[field.name] = field.value;
+            });
+
+            if (typeSelect.value === 'blog-post' && !context.topic && titleField.value) {
+                context.topic = titleField.value;
+            }
+
+            generateButton.disabled = true;
+            generateButton.textContent = 'Generating...';
+            errorEl.style.display = 'none';
+
+            try {
+                const response = await fetch('/admin/generate-content', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ type: typeSelect.value, context })
+                });
+                const data = await response.json();
+                if (!response.ok || data.error) throw new Error(data.error || 'Generation failed');
+
+                const generated = typeof data.content === 'string' ? data.content : JSON.stringify(data.content, null, 2);
+                contentField.value = generated;
+
+                if (!titleField.value) {
+                    const firstHeading = generated.match(/^#\s+(.+)$/m);
+                    titleField.value = firstHeading ? firstHeading[1].trim() : 'New Blog Post';
+                }
+                if (!excerptField.value) {
+                    excerptField.value = generated.replace(/[#*_`>-]/g, '').replace(/\s+/g, ' ').trim().slice(0, 180);
+                }
+                if (!seoTitleField.value) seoTitleField.value = titleField.value.slice(0, 60);
+                if (!seoDescriptionField.value) seoDescriptionField.value = excerptField.value.slice(0, 160);
+                if (typeSelect.value === 'category-intro' && context.categoryName) categoryField.value = context.categoryName;
+            } catch (error) {
+                errorEl.textContent = error.message || 'Could not generate content.';
+                errorEl.style.display = 'block';
+            } finally {
+                generateButton.disabled = false;
+                generateButton.textContent = 'Generate Draft';
+            }
+        });
+
+        renderContextFields();
+    });
+</script>
+
+<%- include('../partials/footer') %>

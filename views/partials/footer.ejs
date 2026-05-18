@@ -226,6 +226,9 @@
 </script>
 
 <script src="/js/main.js"></script>
+<% if (typeof session !== 'undefined' && session.isAdmin) { %>
+    <script src="/js/admin-notifications.js"></script>
+<% } %>
 </body>
 
 </html>

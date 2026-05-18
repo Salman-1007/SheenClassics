@@ -159,7 +159,7 @@
 
                         <div class="product-grid">
                             <% relatedProducts.forEach((rp, i) => { %>
-                                <div class="product-card reveal reveal-delay-<%= Math.min(i % 4 + 1, 4) %>" onclick="window.location.href='/products/<%= rp._id %>'">
+                                <div class="product-card reveal reveal-delay-<%= Math.min(i % 4 + 1, 4) %>" onclick="window.location.href='/products/<%= rp.slug || rp._id %>'">
                                     <div class="product-image-wrap">
                                         <img src="<%= rp.images && rp.images[0] ? rp.images[0] : '/images/p1.jpeg' %>" alt="<%= rp.name %>" class="product-image" loading="lazy">
                                         <div class="product-overlay">

@@ -33,15 +33,6 @@
                                 <!-- Form -->
                                 <form action="/admin/products/add" method="POST" enctype="multipart/form-data">
 
-                                    <!-- Hidden SEO fields (no visual impact) -->
-                                    <input type="hidden" name="metaTitle" value="">
-                                    <input type="hidden" name="metaDescription" value="">
-                                    <input type="hidden" name="metaKeywords" value="">
-                                    <input type="hidden" name="canonicalUrl" value="">
-                                    <input type="hidden" name="ogTitle" value="">
-                                    <input type="hidden" name="ogDescription" value="">
-                                    <input type="hidden" name="ogImage" value="">
-
                                     <!-- Section: Basic Info -->
                                     <div class="reveal" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-xl);padding:2.5rem;margin-bottom:1.5rem;">
                                         <h2 style="font-family:var(--font-serif);font-size:1.3rem;font-weight:400;color:var(--primary);margin-bottom:0.3rem;padding-bottom:1.2rem;border-bottom:1px solid var(--border);margin-bottom:1.8rem;">
@@ -143,6 +134,49 @@
                                         <div id="image-preview" style="display:flex;gap:0.75rem;flex-wrap:wrap;margin-top:1.2rem;"></div>
                                     </div>
 
+                                    <!-- Section: SEO Metadata -->
+                                    <div class="reveal reveal-delay-3" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-xl);padding:2.5rem;margin-bottom:2rem;">
+                                        <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;padding-bottom:1.2rem;border-bottom:1px solid var(--border);margin-bottom:1.8rem;flex-wrap:wrap;">
+                                            <h2 style="font-family:var(--font-serif);font-size:1.3rem;font-weight:400;color:var(--primary);">SEO Metadata</h2>
+                                            <button type="button" id="generate-seo-btn" style="display:inline-flex;align-items:center;gap:6px;padding:0.7rem 1rem;background:var(--primary);border:1px solid var(--primary);border-radius:var(--radius-sm);font-size:0.78rem;font-weight:600;color:#fff;">
+                                                <span>Auto-Generate with AI</span>
+                                            </button>
+                                        </div>
+
+                                        <p id="seo-error" style="display:none;color:#c0392b;font-size:0.82rem;margin-bottom:1rem;"></p>
+
+                                        <div class="form-group">
+                                            <label>SEO Title <span style="font-weight:400;color:var(--text-muted);font-size:0.8em;">(max 60 chars)</span></label>
+                                            <input type="text" name="seoTitle" maxlength="60" placeholder="e.g. Embroidered Lawn Suit | SheenClassics">
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label>Meta Description <span style="font-weight:400;color:var(--text-muted);font-size:0.8em;">(max 160 chars)</span></label>
+                                            <textarea name="seoDescription" maxlength="160" rows="3" placeholder="Compelling Google search description..." style="width:100%;padding:0.85rem 1rem;background:var(--cream);border:1.5px solid var(--border);border-radius:var(--radius);font-family:var(--font-body);font-size:0.95rem;resize:vertical;"></textarea>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label>Keywords <span style="font-weight:400;color:var(--text-muted);font-size:0.8em;">(comma-separated)</span></label>
+                                            <input type="text" name="seoKeywords" placeholder="embroidered clothing, premium lawn suit, classic fashion">
+                                        </div>
+
+                                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+                                            <div class="form-group">
+                                                <label>OG Title</label>
+                                                <input type="text" name="ogTitle" maxlength="60" placeholder="Social share title">
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Canonical URL <span style="font-weight:400;color:var(--text-muted);font-size:0.8em;">(optional)</span></label>
+                                                <input type="url" name="canonicalUrl" placeholder="https://sheenclassics.com/products/product-slug">
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label>OG Description</label>
+                                            <textarea name="ogDescription" maxlength="200" rows="2" placeholder="Description shown when shared on social media..." style="width:100%;padding:0.85rem 1rem;background:var(--cream);border:1.5px solid var(--border);border-radius:var(--radius);font-family:var(--font-body);font-size:0.95rem;resize:vertical;"></textarea>
+                                        </div>
+                                    </div>
+
                                     <!-- Submit -->
                                     <div class="reveal reveal-delay-3" style="display:flex;gap:1rem;">
                                         <button type="submit" class="btn btn-add-cart" style="flex:1;padding:1rem;font-size:0.88rem;display:flex;align-items:center;justify-content:center;gap:8px;">
@@ -185,6 +219,51 @@
             const input = document.getElementById('images-input');
             input.files = e.dataTransfer.files;
             previewImages(input);
+        }
+
+        const seoButton = document.getElementById('generate-seo-btn');
+        if (seoButton) {
+            seoButton.addEventListener('click', async() => {
+                const form = seoButton.closest('form');
+                const error = document.getElementById('seo-error');
+                const name = form.querySelector('[name="name"]').value.trim();
+
+                if (!name) {
+                    error.textContent = 'Add a product name before generating SEO metadata.';
+                    error.style.display = 'block';
+                    return;
+                }
+
+                seoButton.disabled = true;
+                seoButton.querySelector('span').textContent = 'Generating...';
+                error.style.display = 'none';
+
+                try {
+                    const response = await fetch('/admin/generate-seo', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            productName: name,
+                            productDescription: form.querySelector('[name="description"]').value,
+                            category: form.querySelector('[name="category"]').value,
+                            price: form.querySelector('[name="price"]').value
+                        })
+                    });
+                    const data = await response.json();
+                    if (!response.ok || data.error) throw new Error(data.error || 'SEO generation failed');
+
+                    ['seoTitle', 'seoDescription', 'seoKeywords', 'ogTitle', 'ogDescription'].forEach(key => {
+                        const field = form.querySelector(`[name="${key}"]`);
+                        if (field && data[key]) field.value = data[key];
+                    });
+                } catch (err) {
+                    error.textContent = 'Could not generate SEO. Fill fields manually or try again.';
+                    error.style.display = 'block';
+                } finally {
+                    seoButton.disabled = false;
+                    seoButton.querySelector('span').textContent = 'Auto-Generate with AI';
+                }
+            });
         }
 
         // Focus styles for textarea

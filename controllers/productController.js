@@ -112,9 +112,9 @@ exports.getProduct = async(req, res) => {
         }).limit(4);
 
         const fallbackDescription = product.description ? product.description.substring(0, 160) : 'SheenClassics product.';
-        const computedMetaTitle = product.metaTitle || `${product.name} | SheenClassics`;
-        const computedMetaDescription = product.metaDescription || fallbackDescription;
-        const computedMetaKeywords = product.metaKeywords || `${product.category}, ${product.name}, SheenClassics`;
+        const computedMetaTitle = product.seoTitle || product.metaTitle || `${product.name} | SheenClassics`;
+        const computedMetaDescription = product.seoDescription || product.metaDescription || fallbackDescription;
+        const computedMetaKeywords = product.seoKeywords || product.metaKeywords || `${product.category}, ${product.name}, SheenClassics`;
         const computedCanonical = product.canonicalUrl || `${req.protocol}://${req.get('host')}${req.originalUrl}`;
         const computedOgTitle = product.ogTitle || computedMetaTitle;
         const computedOgDescription = product.ogDescription || computedMetaDescription;
@@ -130,7 +130,24 @@ exports.getProduct = async(req, res) => {
             canonicalUrl: computedCanonical,
             ogTitle: computedOgTitle,
             ogDescription: computedOgDescription,
-            ogImage: computedOgImage
+            ogImage: computedOgImage,
+            ogType: 'product',
+            structuredData: {
+                '@context': 'https://schema.org',
+                '@type': product.structuredDataType || 'Product',
+                name: product.name,
+                description: product.description,
+                image: product.images || [],
+                category: product.category,
+                sku: product._id.toString(),
+                offers: {
+                    '@type': 'Offer',
+                    price: product.price,
+                    priceCurrency: 'PKR',
+                    availability: product.stock > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+                    url: computedCanonical
+                }
+            }
         });
     } catch (error) {
         console.error('Error fetching product:', error);

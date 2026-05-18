@@ -1,10 +1,12 @@
 const Product = require('../models/Product');
 const User = require('../models/User');
+const Blog = require('../models/Blog');
 
 exports.getHome = async(req, res) => {
     try {
         const featuredProducts = await Product.find({ featured: true }).limit(8);
         const newProducts = await Product.find().sort({ createdAt: -1 }).limit(8);
+        const blogs = await Blog.find({ published: true }).sort({ featured: -1, createdAt: -1 }).limit(12);
 
         let user = null;
         if (req.session.userId) {
@@ -19,6 +21,7 @@ exports.getHome = async(req, res) => {
             title: 'Home - SheenClassics',
             featuredProducts,
             newProducts,
+            blogs,
             user,
             metaTitle,
             metaDescription,

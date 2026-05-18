@@ -71,7 +71,7 @@
                         <% if (products && products.length > 0) { %>
                             <div class="product-grid" id="products-grid">
                                 <% products.forEach((product, i) => { %>
-                                    <div class="product-card reveal reveal-delay-<%= Math.min(i % 4 + 1, 4) %>" onclick="window.location.href='/products/<%= product._id %>'">
+                                    <div class="product-card reveal reveal-delay-<%= Math.min(i % 4 + 1, 4) %>" onclick="window.location.href='/products/<%= product.slug || product._id %>'">
 
                                         <div class="product-image-wrap">
                                             <img src="<%= product.images && product.images[0] ? product.images[0] : '/images/p1.jpeg' %>" alt="<%= product.name %>" class="product-image" loading="lazy">

@@ -13,15 +13,6 @@
                         <% } %>
 
                             <form action="/admin/products/<%= product._id %>/edit" method="POST">
-                                <!-- Hidden SEO fields (no visual impact) -->
-                                <input type="hidden" name="metaTitle" value="<%= product.metaTitle || '' %>">
-                                <input type="hidden" name="metaDescription" value="<%= product.metaDescription || '' %>">
-                                <input type="hidden" name="metaKeywords" value="<%= product.metaKeywords || '' %>">
-                                <input type="hidden" name="canonicalUrl" value="<%= product.canonicalUrl || '' %>">
-                                <input type="hidden" name="ogTitle" value="<%= product.ogTitle || '' %>">
-                                <input type="hidden" name="ogDescription" value="<%= product.ogDescription || '' %>">
-                                <input type="hidden" name="ogImage" value="<%= product.ogImage || '' %>">
-
                                 <div class="form-group">
                                     <label>Product Name</label>
                                     <input type="text" name="name" value="<%= product.name %>" required>
@@ -78,6 +69,33 @@
                                 <div class="form-group">
                                     <label>Shipping Fee (Rs)</label>
                                     <input type="number" name="shippingFee" step="0.01" min="0" value="<%= product.shippingFee != null ? product.shippingFee : 250 %>">
+                                </div>
+                                <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin:1.5rem 0;">
+                                    <h2 style="font-family:var(--font-serif);font-size:1.3rem;font-weight:400;color:var(--primary);margin-bottom:1rem;">SEO Metadata</h2>
+                                    <div class="form-group">
+                                        <label>SEO Title</label>
+                                        <input type="text" name="seoTitle" maxlength="60" value="<%= product.seoTitle || product.metaTitle || '' %>">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Meta Description</label>
+                                        <textarea name="seoDescription" maxlength="160" rows="3"><%= product.seoDescription || product.metaDescription || '' %></textarea>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Keywords</label>
+                                        <input type="text" name="seoKeywords" value="<%= product.seoKeywords || product.metaKeywords || '' %>">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>OG Title</label>
+                                        <input type="text" name="ogTitle" maxlength="60" value="<%= product.ogTitle || '' %>">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>OG Description</label>
+                                        <textarea name="ogDescription" maxlength="200" rows="2"><%= product.ogDescription || '' %></textarea>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Canonical URL</label>
+                                        <input type="url" name="canonicalUrl" value="<%= product.canonicalUrl || '' %>">
+                                    </div>
                                 </div>
                                 <div style="display: flex; gap: 1rem;">
                                     <button type="submit" class="btn btn-add-cart" style="flex: 1;">Update Product</button>
