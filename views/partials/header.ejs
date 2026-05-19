@@ -26,19 +26,21 @@
     <meta name="theme-color" content="#ffffff">
 
     <% if (typeof structuredData !== 'undefined' && structuredData) { %>
-        <script type="application/ld+json"><%- JSON.stringify(structuredData) %></script>
-    <% } %>
+        <script type="application/ld+json">
+            <%- JSON.stringify(structuredData) %>
+        </script>
+        <% } %>
 
-    <link rel="stylesheet" href="/css/style.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+            <link rel="stylesheet" href="/css/style.css">
+            <link rel="preconnect" href="https://fonts.googleapis.com">
+            <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+            <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 </head>
 
 <body>
 
     <!-- ── Announcement Bar ── -->
-    <div style="background:var(--primary);color:rgba(255,255,255,0.75);text-align:center;padding:0.5rem 1rem;font-size:0.72rem;letter-spacing:0.12em;text-transform:uppercase;font-weight:500;border-bottom:1px solid rgba(212,175,55,0.2);">
+    <div class="announcement-bar" style="background:var(--primary);color:rgba(255,255,255,0.75);text-align:center;padding:0.5rem 1rem;font-size:0.72rem;letter-spacing:0.12em;text-transform:uppercase;font-weight:500;border-bottom:1px solid rgba(212,175,55,0.2);">
         <span style="color:var(--gold);">✦</span> &nbsp; Free nationwide delivery on orders over Rs 3,000 &nbsp;
         <span style="color:var(--gold);">✦</span>
     </div>
@@ -54,7 +56,7 @@
                 </a>
 
                 <!-- Desktop Menu -->
-                <ul class="nav-menu" id="nav-menu">
+                <ul class="nav-menu nav-links" id="nav-menu">
                     <li><a href="/" class="nav-link">Home</a></li>
                     <li><a href="/products?category=Clothing" class="nav-link">Clothing</a></li>
                     <li><a href="/products?category=HomeDecor" class="nav-link">Home Decor</a></li>
@@ -117,10 +119,9 @@
             </div>
         </div>
     </nav>
+    <div id="nav-overlay" class="nav-overlay"></div>
 
     <style>
-        /* Show nav-icons-lg only on large screens */
-        
         .nav-icons-lg {
             display: none !important;
         }
@@ -137,11 +138,11 @@
                 opacity: 1;
             }
         }
-
+        
         .admin-stock-alerts {
             position: relative;
         }
-
+        
         .admin-stock-alerts-btn {
             width: 34px;
             height: 34px;
@@ -154,7 +155,7 @@
             justify-content: center;
             position: relative;
         }
-
+        
         .admin-stock-alerts-count {
             position: absolute;
             top: -6px;
@@ -171,7 +172,7 @@
             justify-content: center;
             padding: 0 5px;
         }
-
+        
         .admin-stock-alerts-panel {
             position: absolute;
             right: 0;
@@ -184,7 +185,7 @@
             z-index: 1100;
             overflow: hidden;
         }
-
+        
         .admin-stock-alerts-title {
             padding: 0.9rem 1rem;
             font-size: 0.78rem;
@@ -193,7 +194,7 @@
             text-transform: uppercase;
             border-bottom: 1px solid var(--border);
         }
-
+        
         .admin-stock-alerts-item,
         .admin-stock-alerts-empty {
             margin: 0;
@@ -202,17 +203,17 @@
             color: var(--text-secondary);
             border-bottom: 1px solid var(--border);
         }
-
+        
         .admin-stock-alerts-item.critical {
             background: #fff5f5;
             color: #a93226;
         }
-
+        
         .admin-stock-alerts-item.warning {
             background: #fffbeb;
             color: #8a5a00;
         }
-
+        
         .admin-stock-alerts-link {
             display: block;
             padding: 0.75rem 1rem;
@@ -222,8 +223,6 @@
             font-weight: 700;
         }
     </style>
-    <!-- Mobile nav overlay -->
-    <div class="nav-overlay" id="nav-overlay"></div>
 
     <!-- ── Toast Notification ── -->
     <div id="notification" style="display:none;position:fixed;top:88px;right:20px;z-index:9999;max-width:320px;min-width:240px;padding:1rem 1.25rem;border-radius:var(--radius-lg);box-shadow:var(--shadow-lg);font-size:0.85rem;font-weight:500;font-family:var(--font-body);display:flex;align-items:center;gap:0.6rem;transition:all 0.3s var(--ease);">

@@ -192,6 +192,7 @@
         function openMenu() {
             toggle.classList.add('open');
             menu.classList.add('active');
+            menu.classList.add('nav-open');
             overlay && overlay.classList.add('active');
             document.body.style.overflow = 'hidden';
             toggle.setAttribute('aria-expanded', 'true');
@@ -200,6 +201,7 @@
         function closeMenu() {
             toggle.classList.remove('open');
             menu.classList.remove('active');
+            menu.classList.remove('nav-open');
             overlay && overlay.classList.remove('active');
             document.body.style.overflow = '';
             toggle.setAttribute('aria-expanded', 'false');
@@ -218,6 +220,16 @@
             });
         });
 
+        // Close menu when clicking anywhere outside of it
+        document.addEventListener('click', (event) => {
+            if (window.innerWidth <= 768 && menu.classList.contains('active')) {
+                // Check if click is outside menu and toggle button
+                if (!menu.contains(event.target) && !toggle.contains(event.target)) {
+                    closeMenu();
+                }
+            }
+        });
+
         // Close on resize to desktop
         window.addEventListener('resize', () => {
             if (window.innerWidth > 768) closeMenu();
@@ -228,7 +240,7 @@
 <script src="/js/main.js"></script>
 <% if (typeof session !== 'undefined' && session.isAdmin) { %>
     <script src="/js/admin-notifications.js"></script>
-<% } %>
-</body>
+    <% } %>
+        </body>
 
-</html>
+        </html>

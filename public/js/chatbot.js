@@ -9,6 +9,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // Store conversation history in session storage for context
     let conversationHistory = [];
 
+    // Flag to track if initial greeting has been shown on page load
+    let initialGreetingShown = false;
+
     const addMessage = (text, role, source = null) => {
         const message = document.createElement('div');
         message.className = `chatbot-message chatbot-message-${role}`;
@@ -92,14 +95,25 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    // Show initial greeting on page load if this is the full chatbot page (not widget)
+    if (chatForm && !chatbotToggle && chatHistory.children.length === 0 && !initialGreetingShown) {
+        addMessage('Hi! I am the SheenClassics assistant. Ask me about products, orders, shipping, returns, or styling ideas.', 'bot');
+        initialGreetingShown = true;
+        // Focus input after a short delay
+        setTimeout(() => {
+            if (chatInput) chatInput.focus();
+        }, 100);
+    }
+
     // Toggle chatbot panel
     if (chatbotToggle) {
         chatbotToggle.addEventListener('click', () => {
             const isActive = chatbotPanel.classList.toggle('active');
             if (isActive) {
-                // Show greeting if history is empty
-                if (chatHistory.children.length === 0) {
+                // Show greeting if history is empty and not already shown
+                if (chatHistory.children.length === 0 && !initialGreetingShown) {
                     addMessage('Hi! I am the SheenClassics assistant. Ask me about products, orders, shipping, returns, or styling ideas.', 'bot');
+                    initialGreetingShown = true;
                 }
                 // Focus input after a short delay to ensure panel is rendered
                 setTimeout(() => {

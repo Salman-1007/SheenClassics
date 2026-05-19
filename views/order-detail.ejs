@@ -235,19 +235,4 @@
             }, {
                 passive: true
             });
-
-            // Mobile menu
-            const toggle = document.querySelector('.mobile-menu-toggle');
-            const menu = document.querySelector('.nav-menu');
-            const overlay = document.querySelector('.nav-overlay');
-            if (toggle && menu) {
-                function toggleMenu(open) {
-                    toggle.classList.toggle('open', open);
-                    menu.classList.toggle('active', open);
-                    overlay && overlay.classList.toggle('active', open);
-                    document.body.style.overflow = open ? 'hidden' : '';
-                }
-                toggle.addEventListener('click', () => toggleMenu(!menu.classList.contains('active')));
-                overlay && overlay.addEventListener('click', () => toggleMenu(false));
-            }
         </script>

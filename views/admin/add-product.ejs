@@ -106,13 +106,13 @@
                                         </div>
 
                                         <!-- Featured toggle -->
-                                        <div style="display:flex;align-items:center;gap:0.8rem;padding:1.2rem;background:var(--cream);border:1.5px solid var(--border);border-radius:var(--radius);margin-top:0.5rem;cursor:pointer;" onclick="this.querySelector('input').click()">
+                                        <label for="featured-check" style="display:flex;align-items:center;gap:0.8rem;padding:1.2rem;background:var(--cream);border:1.5px solid var(--border);border-radius:var(--radius);margin-top:0.5rem;cursor:pointer;">
                                             <input type="checkbox" name="featured" id="featured-check" style="width:18px;height:18px;accent-color:var(--gold);cursor:pointer;">
                                             <div>
-                                                <label for="featured-check" style="font-size:0.88rem;font-weight:600;color:var(--text-primary);cursor:pointer;display:block;margin:0;">Mark as Featured Product</label>
+                                                <span style="font-size:0.88rem;font-weight:600;color:var(--text-primary);cursor:pointer;display:block;margin:0;">Mark as Featured Product</span>
                                                 <span style="font-size:0.75rem;color:var(--text-muted);">Featured products are shown on the homepage</span>
                                             </div>
-                                        </div>
+                                        </label>
                                     </div>
 
                                     <!-- Section: Images -->
@@ -241,7 +241,9 @@
                 try {
                     const response = await fetch('/admin/generate-seo', {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
                         body: JSON.stringify({
                             productName: name,
                             productDescription: form.querySelector('[name="description"]').value,
